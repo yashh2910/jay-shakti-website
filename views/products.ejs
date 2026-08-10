@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+</head>
+<body>
+<%- include('partials/navbar') %>
+
+<section class="section-sm" style="background:#EEF4FA;">
+  <div class="container">
+    <div class="section-heading fade-in-up" style="margin-bottom:24px;">
+      <span class="eyebrow">Catalogue</span>
+      <h2>Our Products</h2>
+      <p>Browse hardware, electrical and electronic products. Prices on request — get the best deal via enquiry.</p>
+    </div>
+
+    <div class="products-toolbar fade-in-up">
+      <form id="productSearchForm" action="/products" method="GET" class="search-box">
+        <% if (activeCategory) { %><input type="hidden" name="category" value="<%= activeCategory %>" /><% } %>
+        <input type="text" id="productSearchInput" name="q" value="<%= searchTerm %>" placeholder="Search products..." />
+      </form>
+      <div class="category-filters">
+        <a href="/products<%= searchTerm ? '?q=' + encodeURIComponent(searchTerm) : '' %>" class="<%= activeCategory === '' ? 'active' : '' %>">All</a>
+        <% categories.forEach(function(cat) { %>
+          <a href="/products?category=<%= cat.slug %><%= searchTerm ? '&q=' + encodeURIComponent(searchTerm) : '' %>"
+             class="<%= activeCategory === cat.slug ? 'active' : '' %>"><%= cat.name %></a>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="products-grid">
+      <% products.forEach(function(p) { %>
+        <div class="product-card fade-in-up">
+          <a href="/products/<%= p.slug %>" class="thumb">
+            <% if (p.featured) { %><span class="badge">Featured</span><% } %>
+            <img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy" />
+          </a>
+          <div class="body">
+            <span class="cat-tag"><%= p.category_name || 'General' %></span>
+            <h3><a href="/products/<%= p.slug %>"><%= p.name %></a></h3>
+            <p class="desc"><%= (p.description || '').slice(0, 80) %><%= (p.description||'').length > 80 ? '…' : '' %></p>
+            <div class="card-actions">
+              <a href="/products/<%= p.slug %>" class="btn btn-outline-dark btn-sm">View Details</a>
+              
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <% if (products.length === 0) { %>
+      <div class="no-results fade-in-up">
+        <h3>No products found</h3>
+        <p>Try a different search term or category, or <a href="/products">view all products</a>.</p>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+<script src="/js/main.js"></script>
+<script src="/js/products.js"></script>
+</body>
+</html>

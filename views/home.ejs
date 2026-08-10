@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body>
+<%- include('partials/navbar') %>
+
+<!-- HERO -->
+<section class="hero">
+  <% const heroSlides = (business.heroSlides && business.heroSlides.length) ? business.heroSlides : [{ image: '/assets/banners/home.png', title: '', subtitle: '' }]; %>
+  <div class="hero-slideshow" id="heroSlideshow">
+    <% heroSlides.forEach(function (slide, i) { %>
+      <div class="hero-slide<%= i === 0 ? ' active' : '' %>" style="background-image: url('<%= slide.image %>');"></div>
+    <% }); %>
+  </div>
+  <div class="container hero-inner">
+    <span class="eyebrow">Drip &bull; Hardware &bull; Electrical &bull; Electronics</span>
+    <div class="hero-text-slides" id="heroTextSlides">
+      <% heroSlides.forEach(function (slide, i) { %>
+        <div class="hero-text-slide<%= i === 0 ? ' active' : '' %>">
+          <% if (slide.title) { %>
+            <h1><%= slide.title %></h1>
+          <% } else { %>
+            <h1>Power Your Home &amp; Business with <span><%= business.shortName %></span></h1>
+          <% } %>
+          <% if (slide.subtitle) { %>
+            <p><%= slide.subtitle %></p>
+          <% } else { %>
+            <p><%= business.tagline %>. Quality hardware items, electrical goods, electronic components, tools and lighting solutions — all under one roof.</p>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+    
+  </div>
+</section>
+
+<!-- HIGHLIGHTS -->
+<section class="highlights">
+  <div class="container">
+    <div class="highlights-grid">
+      <div class="highlight-item"><div class="num">500+</div><div class="label">Products Available</div></div>
+      <div class="highlight-item"><div class="num">8+</div><div class="label">Product Categories</div></div>
+      <div class="highlight-item"><div class="num">100%</div><div class="label">Genuine Products</div></div>
+      <div class="highlight-item"><div class="num">Quick</div><div class="label">WhatsApp Support</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section">
+  <div class="container">
+    <div class="section-heading fade-in-up">
+      <span class="eyebrow">What We Offer</span>
+      <h2>Shop by Category</h2>
+      <p>From everyday hardware to specialised electronic components — find exactly what your project needs.</p>
+    </div>
+    <div class="categories-grid">
+      <% categories.slice(0, 8).forEach(function(cat) { %>
+        <a href="/products?category=<%= cat.slug %>" class="category-card fade-in-up">
+          <img src="<%= cat.image %>" alt="<%= cat.name %>" loading="lazy" />
+          <div class="cat-label">
+            <span><%= cat.name %></span>
+            <span>&rarr;</span>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="anatomy-section" id="anatomySection">
+
+  <!-- Header -->
+  <div class="anatomy-header">
+    <span class="brand-tag">JAY SHAKTI Drip, Hardware & Electronics</span>
+    <h2 class="main-title">The Anatomy of Our Product</h2>
+  </div>
+
+  <!-- Scroll-scrubbed 3D frame sequence -->
+  <div class="anatomy-scroll-track" id="anatomyScrollTrack" data-frame-count="83" data-frame-base="/assets/homephoto/ezgif-frame-" data-frame-pad="3" data-frame-ext=".jpg">
+    <div class="anatomy-sticky">
+
+      <canvas id="anatomyCanvas" class="anatomy-canvas"></canvas>
+      <div class="anatomy-canvas-overlay"></div>
+
+      <!-- Text Layers (fade in sync with scroll progress) -->
+      <div class="anatomy-text-layers">
+
+        <div class="anatomy-text-layer active" data-step="1">
+          <!-- <span class="step-num">01</span> -->
+          <h3>Smart Irrigation Control Station</h3>
+          <p>પ્રેશર ગેજ અને ડિસ્ક ફિલ્ટર સાથેની સંપૂર્ણ ઓટોમેટિક ડ્રીપ કંટ્રોલ સિસ્ટમ.</p>
+        </div>
+
+        <div class="anatomy-text-layer" data-step="2">
+          <!-- <span class="step-num">02</span> -->
+          <h3>Heavy-Duty Drip Lateral Line</h3>
+          <p>ઉચ્ચ ગુણવત્તાવાળી ડ્રીપ લાઈન, જે ખેતરમાં છેવાડાના છોડ સુધી એકસરખું પાણી પહોંચાડે છે.</p>
+        </div>
+
+        <div class="anatomy-text-layer" data-step="3">
+          <!-- <span class="step-num">03</span> -->
+          <h3>Smart Precision Dripper</h3>
+          <p>દરેક છોડના મૂળ સુધી ટીપે-ટીપે યોગ્ય માત્રામાં પાણી અને ખાતર પહોંચાડતી ક્રાંતિકારી ટેકનોલોજી.</p>
+        </div>
+
+        <div class="anatomy-text-layer" data-step="4">
+          <!-- <span class="step-num">04</span> -->
+          <h3>Advanced Sand & Media Filter System</h3>
+          <p>કચરા અને શેવાળવાળા પાણીને શુદ્ધ કરી ડ્રીપ સિસ્ટમને બ્લોકેજ (ચોકઅપ) થતી બચાવતી ફિલ્ટર સિસ્ટમ.</p>
+        </div>
+
+        <div class="anatomy-text-layer" data-step="5">
+          <!-- <span class="step-num">05</span> -->
+          <h3>High-Pressure Ball Valves & PVC Components</h3>
+          <p>પાણીના પ્રવાહને સરળતાથી કંટ્રોલ કરતા વાલ્વ અને લાંબા આયુષ્ય વાળા પવીસી પાઈપ સોલ્યુશન્સ.</p>
+        </div>
+
+        <div class="anatomy-text-layer" data-step="6">
+          <!-- <span class="step-num">06</span> -->
+          <h3>Multi-Zone Sub-Main Header Valves</h3>
+          <p>ખેતરના અલગ-અલગ વિભાગોમાં ઈક્વલ પ્રેશરથી પાણીનું વિતરણ કરતી અને પ્રવાહને સરળતાથી નિયંત્રિત કરતી વાલ્વ એસેમ્બલી.</p>
+        </div>
+
+        <div class="anatomy-text-layer" data-step="7">
+          <!-- <span class="step-num">07</span> -->
+          <h3>Central Drip Control & Venturi System</h3>
+          <p>પ્રેશર ગેજ, ડિસ્ક ફિલ્ટર અને લિક્વિડ ખાતર આપવા માટેની વેન્ચુરી સિસ્ટમ સાથેનું સંપૂર્ણ હેડ કંટ્રોલ સ્ટેશન.</p>
+        </div>
+
+      </div>
+
+      <!-- Progress dots -->
+      <div class="anatomy-dots">
+        <span class="dot active" data-target="1"></span>
+        <span class="dot" data-target="2"></span>
+        <span class="dot" data-target="3"></span>
+        <span class="dot" data-target="4"></span>
+        <span class="dot" data-target="5"></span>
+        <span class="dot" data-target="6"></span>
+        <span class="dot" data-target="7"></span>
+      </div>
+
+      <!-- Scroll progress bar -->
+      <div class="anatomy-progress"><div class="anatomy-progress-bar" id="anatomyProgressBar"></div></div>
+
+      <div class="anatomy-scroll-hint" id="anatomyScrollHint"><i class="fa-solid fa-arrow-down"></i><span>Scroll</span></div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section" style="background:#EEF4FA;">
+  <div class="container">
+    <div class="section-heading fade-in-up">
+      <span class="eyebrow">Best Sellers</span>
+      <h2>Featured Products</h2>
+      <p>A quick look at some of our most popular and trusted products.</p>
+    </div>
+    <div class="products-grid">
+      <% featuredProducts.forEach(function(p) { %>
+        <div class="product-card fade-in-up">
+          <a href="/products/<%= p.slug %>" class="thumb">
+            <!-- <span class="badge">Featured</span> -->
+            <img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy" />
+          </a>
+          <div class="body">
+            <h3><a href="/products/<%= p.slug %>"><%= p.name %></a></h3>
+            <p class="desc"><%= (p.description || '').slice(0, 80) %><%= (p.description||'').length > 80 ? '…' : '' %></p>
+            <div class="card-actions">
+              <a href="/products/<%= p.slug %>" class="btn btn-outline-dark btn-sm">Get Best Price</a>
+              <!-- <a href="<%= buildWhatsAppLink(business.whatsapp, {productName: p.name, businessName: business.name, defaultMessage: business.whatsappMessage}) %>" target="_blank" rel="noopener" class="btn btn-whatsapp btn-sm">Enquiry</a> -->
+            </div>
+          </div>
+        </div>
+      <% }) %>
+      <% if (featuredProducts.length === 0) { %>
+        <p class="no-results">Featured products will appear here once added from the admin panel.</p>
+      <% } %>
+    </div>
+    <div style="text-align:center; margin-top: 36px;">
+      <a href="/products" class="btn btn-primary">View All Products</a>
+    </div>
+  </div>
+</section>
+
+<!-- PROMO BANNER -->
+<section class="section-sm">
+  <div class="container">
+    <div class="promo-banner fade-in-up" style="background-image: url('/assets/banners/demo.png');">
+      <div class="promo-inner">
+        <h3>Complete Solutions for Home, Farm &amp; Industry</h3>
+        <p>Hardware, electrical fittings, wires, tools and more — trusted by customers across the region.</p>
+        <a href="/products" class="btn btn-accent">Explore Catalogue</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- WHY CHOOSE US -->
+<section class="section why-section">
+  <div class="container">
+
+    <div class="section-heading fade-in-up">
+      <span class="eyebrow">WHY CHOOSE US</span>
+      <h2>Why Customers Trust Jay Shakti</h2>
+      <p>
+        Delivering genuine hardware & electrical products with reliable service
+        and competitive pricing.
+      </p>
+    </div>
+
+    <div class="why-grid">
+
+      <!-- Genuine Products -->
+      <div class="why-card fade-in-up">
+        <div class="why-icon">
+          <i class="fa-regular fa-circle-check"></i>
+        </div>
+
+        <h4>Genuine Products</h4>
+
+        <p>
+          We provide only original, quality-tested hardware and electrical
+          products from trusted brands.
+        </p>
+
+        <span class="why-line"></span>
+      </div>
+
+      <!-- Quick Response -->
+      <div class="why-card fade-in-up">
+        <div class="why-icon">
+          <i class="fa-regular fa-comment-dots"></i>
+        </div>
+
+        <h4>Quick Response</h4>
+
+        <p>
+          Get fast quotations and instant support through WhatsApp or phone.
+        </p>
+
+        <span class="why-line"></span>
+      </div>
+
+      <!-- Wide Range -->
+      <div class="why-card fade-in-up">
+        <div class="why-icon">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+        </div>
+
+        <h4>Wide Range</h4>
+
+        <p>
+          Everything from electrical accessories to tools and lighting under
+          one roof.
+        </p>
+
+        <span class="why-line"></span>
+      </div>
+
+      <!-- Trusted Service -->
+      <div class="why-card fade-in-up">
+        <div class="why-icon">
+          <i class="fa-regular fa-handshake"></i>
+        </div>
+
+        <h4>Trusted Service</h4>
+
+        <p>
+          Friendly guidance and dependable after-sales support you can always
+          rely on.
+        </p>
+
+        <span class="why-line"></span>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT BUSINESS -->
+<section class="section" style="background:#EEF4FA;">
+  <div class="container about-split">
+    <div class="fade-in-up">
+      <span class="eyebrow">About Us</span>
+      <h2><%= business.shortName %> Hardware &amp; Electronics</h2>
+      <p><%= business.description %></p>
+      <ul class="about-list">
+        <li>Wide range of hardware, electrical and electronic products</li>
+        <li>Friendly and knowledgeable customer support</li>
+        <li>Fast enquiry response over WhatsApp and phone</li>
+        <li>Competitive pricing — request a quote for any product</li>
+      </ul>
+      <a href="/about" class="btn btn-primary" style="margin-top:22px;">Read More About Us</a>
+    </div>
+    <img src="/assets/banners/11.png" alt="About <%= business.name %>" class="fade-in-up" loading="lazy" />
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-strip fade-in-up">
+      <div>
+        <h3>Have a question about a product?</h3>
+        <p>Send us an enquiry and our team will get back to you with the best price.</p>
+      </div>
+      <div class="cta-actions">
+        <a href="/contact" class="btn btn-accent">Send Enquiry</a>
+        <a
+  href="<%= buildWhatsAppLink(business.whatsapp, {
+    defaultMessage: business.whatsappMessage
+  }) %>"
+  target="_blank"
+  rel="noopener"
+  class="btn btn-whatsapp"
+>
+  Chat on WhatsApp
+</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

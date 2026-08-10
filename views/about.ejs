@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+</head>
+<body>
+<%- include('partials/navbar') %>
+
+<section class="hero" style="min-height:40vh; min-height: 400px; background-image: url('/assets/banners/abt.png');
+background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+">
+  <div class="container hero-inner">
+    <span class="eyebrow">About Us</span>
+    <h1>Get to Know <span><%= business.shortName %></span></h1>
+    <p><%= business.tagline %></p>
+  </div>
+</section>
+
+<section class="section about-section">
+  <div class="container about-split">
+
+    <!-- Left Image -->
+    <div class="about-image fade-in-up">
+      <img src="/assets/banners/ab2.png" alt="Our Business" loading="lazy">
+    </div>
+
+    <!-- Right Content -->
+    <div class="about-content">
+
+      <span class="eyebrow">Our Story</span>
+
+      <h2>Business Introduction</h2>
+
+      <div class="title-line"></div>
+
+      <p>
+        <%= business.description %>
+      </p>
+
+
+    </div>
+
+  </div>
+</section>
+<section class="section" style="background:#EEF4FA;">
+  <div class="container">
+
+    <div class="section-heading fade-in-up">
+      <span class="eyebrow">What Sets Us Apart</span>
+      <h2>Our Values</h2>
+    </div>
+
+    <div class="why-grid">
+
+      <!-- Quality -->
+      <div class="why-card fade-in-up">
+
+        <div class="why-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 3l7 3v5c0 5-3.5 9.5-7 10-3.5-.5-7-5-7-10V6l7-3z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+
+        <h4>Quality First</h4>
+
+        <p>
+          We source only reliable, quality-checked hardware and electronic products.
+        </p>
+
+      </div>
+
+      <!-- Customer -->
+
+      <div class="why-card fade-in-up">
+
+        <div class="why-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 10a6 6 0 10-12 0v4"/>
+            <path d="M6 18h2v-4H6z"/>
+            <path d="M16 14h2v4h-2z"/>
+          </svg>
+        </div>
+
+        <h4>Customer Focused</h4>
+
+        <p>
+          Every enquiry is handled with care — we help you find exactly what you need.
+        </p>
+
+      </div>
+
+      <!-- Products -->
+
+      <div class="why-card fade-in-up">
+
+        <div class="why-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 7h16v10H4z"/>
+            <path d="M9 7V5h6v2"/>
+            <path d="M10 12h4"/>
+          </svg>
+        </div>
+
+        <h4>Wide Product Range</h4>
+
+        <p>
+          Hardware, electrical goods, electronic components, tools, wires and lighting — all in one place.
+        </p>
+
+      </div>
+
+      <!-- Fast -->
+
+      <div class="why-card fade-in-up">
+
+        <div class="why-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+          </svg>
+        </div>
+
+        <h4>Fast Response</h4>
+
+        <p>
+          Reach us instantly on WhatsApp or by phone for quick answers and quotes.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading fade-in-up">
+      <span class="eyebrow">Why Customers Choose Us</span>
+      <h2>Trusted by Our Community</h2>
+      <!-- <p>[Editable: add specific testimonials, certifications, or achievements once available. Avoid unverified claims such as exact years in business or number of locations until confirmed.]</p> -->
+    </div>
+    <div class="cta-strip fade-in-up">
+      <div>
+        <h3>Want to know more about our products?</h3>
+        <p>Reach out — we're happy to help you find the right solution.</p>
+      </div>
+      <div class="cta-actions">
+        <a href="/contact" class="btn btn-accent">Contact Us</a>
+        <a
+  href="<%= buildWhatsAppLink(business.whatsapp, {
+    defaultMessage: business.whatsappMessage
+  }) %>"
+  target="_blank"
+  rel="noopener"
+  class="btn btn-whatsapp"
+>
+  WhatsApp Us
+</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

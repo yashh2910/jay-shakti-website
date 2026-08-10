@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+</head>
+<body>
+<%- include('partials/navbar') %>
+
+<section class="section-sm" style="background:#EEF4FA;">
+  <div class="container">
+    <div class="section-heading fade-in-up" style="margin-bottom:36px;">
+      <span class="eyebrow">Get In Touch</span>
+      <h2>Contact Us</h2>
+  
+    </div>
+   
+<% if (business.ownerPhoto || business.ownerIntro) { %>
+
+<div class="owner-intro-card fade-in-up" style="margin-bottom:36px;">
+
+    <% if (business.ownerPhoto) { %>
+        <div class="owner-intro-photo">
+            <img src="<%= business.ownerPhoto %>" alt="Owner">
+        </div>
+    <% } %>
+
+    <div class="owner-intro-text">
+
+        <span class="eyebrow">About Me</span>
+
+        <h2><%= business.ownerName || "Vipulbhai G. Gabu" %></h2>
+
+        <% if (business.ownerIntro) { %>
+            <p><%= business.ownerIntro %></p>
+        <% } %>
+
+    </div>
+
+</div>
+
+<% } %>
+
+    <div class="contact-grid">
+      <div class="fade-in-up">
+        <div class="contact-info-card">
+          <div class="contact-info-item">
+            <div class="icon">📍</div>
+            <div>
+              <h5>Address</h5>
+              <p>
+                <%= business.address %><% if (business.area) { %>, <%= business.area %><% } %><% if (business.city) { %>, <%= business.city %><% } %><% if (business.state) { %>, <%= business.state %><% } %><% if (business.pincode) { %> - <%= business.pincode %><% } %><% if (business.country) { %>, <%= business.country %><% } %>
+              </p>
+              <% if (business.mapUrl) { %><p><a href="<%= business.mapUrl %>" target="_blank" rel="noopener noreferrer">Get Directions →</a></p><% } %>
+            </div>
+          </div>
+          <% if (business.phone) { %>
+          <div class="contact-info-item">
+            <div class="icon">📞</div>
+            <div><h5>Phone</h5><p><a href="tel:<%= business.phone.replace(/\s+/g,'') %>"><%= business.phone %></a></p></div>
+          </div>
+          <% } %>
+          <% if (business.phoneSecondary) { %>
+          <div class="contact-info-item">
+            <div class="icon">📞</div>
+            <div><h5>Alternate Phone</h5><p><a href="tel:<%= business.phoneSecondary.replace(/\s+/g,'') %>"><%= business.phoneSecondary %></a></p></div>
+          </div>
+          <% } %>
+          <% if (business.whatsapp) { %>
+          <div class="contact-info-item">
+            <div class="icon">💬</div>
+            <div>
+  <h5>WhatsApp</h5>
+  <p>
+    <a href="<%= buildWhatsAppLink(business.whatsapp_number, {
+      defaultMessage: business.whatsapp_message
+    }) %>"
+    target="_blank"
+    rel="noopener">
+      Chat with us
+    </a>
+  </p>
+</div>
+          </div>
+          <% } %>
+          <% if (business.email) { %>
+          <div class="contact-info-item">
+            <div class="icon">✉️</div>
+            <div><h5>Email</h5><p><a href="mailto:<%= business.email %>"><%= business.email %></a></p></div>
+          </div>
+          <% } %>
+          <% if (business.emailAlternate) { %>
+          <div class="contact-info-item">
+            <div class="icon">✉️</div>
+            <div><h5>Alternate Email</h5><p><a href="mailto:<%= business.emailAlternate %>"><%= business.emailAlternate %></a></p></div>
+          </div>
+          <% } %>
+          <% if (business.hours) { %>
+          <div class="contact-info-item">
+            <div class="icon">🕒</div>
+            <div><h5>Business Hours</h5><p><%= business.hours %></p></div>
+          </div>
+          <% } %>
+          <% if (business.socials.facebook || business.socials.instagram || business.socials.youtube || business.socials.linkedin) { %>
+          <div class="contact-info-item">
+            <div class="icon">🔗</div>
+            <div>
+              <h5>Follow Us</h5>
+              <p>
+                <% if (business.socials.facebook) { %><a href="<%= business.socials.facebook %>" target="_blank" rel="noopener noreferrer">Facebook</a><% } %>
+                <% if (business.socials.instagram) { %> &nbsp;|&nbsp; <a href="<%= business.socials.instagram %>" target="_blank" rel="noopener noreferrer">Instagram</a><% } %>
+                <% if (business.socials.youtube) { %> &nbsp;|&nbsp; <a href="<%= business.socials.youtube %>" target="_blank" rel="noopener noreferrer">YouTube</a><% } %>
+                <% if (business.socials.linkedin) { %> &nbsp;|&nbsp; <a href="<%= business.socials.linkedin %>" target="_blank" rel="noopener noreferrer">LinkedIn</a><% } %>
+              </p>
+            </div>
+          </div>
+          <% } %>
+        </div>
+
+        <div class="map-placeholder fade-in-up" style="margin-top:24px;">
+          <% if (business.mapEmbedUrl) { %>
+            <iframe src="<%= business.mapEmbedUrl %>" allowfullscreen="" loading="lazy"></iframe>
+          <% } else { %>
+            <span>📍 Google Maps embed goes here.<br/>Add a Google Maps Embed URL from Admin → Settings → Address.</span>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="fade-in-up">
+        <div class="form-card">
+          <% if (submitted) { %>
+            <div class="alert-success">✅ Thank you! Your enquiry has been received. We'll contact you shortly.</div>
+          <% } %>
+          <form action="/enquiry" method="POST">
+            <input type="hidden" name="redirect_to" value="/contact" />
+            <div class="form-group">
+              <label for="customer_name">Full Name *</label>
+              <input class="form-control" type="text" id="customer_name" name="customer_name" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="mobile">Mobile Number *</label>
+                <input class="form-control" type="tel" id="mobile" name="mobile" required />
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input class="form-control" type="email" id="email" name="email" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="product_name">Product (if any)</label>
+              <input class="form-control" type="text" id="product_name" name="product_name" placeholder="e.g. LED Bulb 9W" />
+            </div>
+            <div class="form-group">
+              <label for="quantity">Quantity</label>
+              <input class="form-control" type="text" id="quantity" name="quantity" placeholder="e.g. 5 pcs" />
+            </div>
+            <div class="form-group">
+              <label for="message">Message *</label>
+              <textarea class="form-control" id="message" name="message" required placeholder="How can we help you?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Send Enquiry</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

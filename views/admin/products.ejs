@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+  <%- include('../partials/admin-nav') %>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1>Manage Products</h1>
+      <a href="/admin/products/new" class="abtn abtn-primary">+ Add Product</a>
+    </div>
+
+    <div class="admin-card">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Image</th><th>Name</th><th>Category</th><th>Availability</th><th>Featured</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% products.forEach(function(p) { %>
+            <tr>
+              <td><img src="<%= p.image %>" class="thumb-sm" alt="<%= p.name %>" /></td>
+              <td><%= p.name %></td>
+              <td><%= p.category_name || '-' %></td>
+              <td><%= p.availability %></td>
+              <td><%= p.featured ? '⭐ Yes' : 'No' %></td>
+              <td>
+                <div class="table-actions">
+                  <a href="/admin/products/<%= p.id %>/edit" class="abtn abtn-outline abtn-sm">Edit</a>
+                  <form action="/admin/products/<%= p.id %>/delete" method="POST" onsubmit="return confirm('Delete this product?');">
+                    <button type="submit" class="abtn abtn-danger abtn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (products.length === 0) { %>
+            <tr><td colspan="6" style="text-align:center; color:#7a877f;">No products yet. Click "Add Product" to create one.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+  <%- include('../partials/admin-nav') %>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1>Enquiries</h1>
+    </div>
+
+    <div class="admin-card">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% enquiries.forEach(function(e) { %>
+            <tr id="enquiry-row-<%= e.id %>">
+              <td><%= e.customer_name %></td>
+              <td><%= e.mobile %></td>
+              <td><%= e.product_name || '-' %></td>
+              <td><%= e.quantity || '-' %></td>
+              <td><span class="badge-status badge-<%= e.status.replace(' ','-') %>"><%= e.status %></span></td>
+              <td><%= new Date(e.created_at).toLocaleString() %></td>
+              <td>
+                <div class="action-buttons" style="display: flex; flex-direction: row; align-items: center; gap: 8px; white-space: nowrap;">
+                  <a href="/admin/enquiries/<%= e.id %>" class="abtn abtn-outline abtn-sm">View</a>
+                  <!-- 🗑️ Delete Button -->
+                  <form action="/admin/enquiries/<%= e.id %>/delete" method="POST" onsubmit="return confirm('શું તમે આ Enquiry ડિલીટ કરવા માંગો છો?');" style="margin:0;">
+  <button type="submit" class="abtn abtn-danger abtn-sm">Delete</button>
+</form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (enquiries.length === 0) { %>
+            <tr><td colspan="7" style="text-align:center; color:#7a877f;">No enquiries found.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- ⚙️ Delete JS Functionality -->
+<script>
+async function deleteEnquiry(id) {
+  if (confirm('શું તમે આ Enquiry ડિલીટ કરવા માંગો છો?')) {
+    try {
+      const response = await fetch(`/admin/enquiries/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        
+        const row = document.getElementById(`enquiry-row-${id}`);
+        if (row) {
+          row.remove();
+        } else {
+          location.reload();
+        }
+      } else {
+        const data = await response.json();
+        alert(data.message || 'ડિલીટ કરવામાં ભૂલ આવી');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('સર્વર સાથે કનેક્ટ ન થઈ શક્યું. કૃપા કરીને ટર્મિનલમાં ભૂલ ચેક કરો.');
+    }
+  }
+}
+</script>
+</body>
+</html>

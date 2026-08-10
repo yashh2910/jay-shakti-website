@@ -1,0 +1,146 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../db/database');
+const config = require('../config');
+const settingsService = require('../services/settingsService');
+const { buildWhatsAppLink } = require('../utils/helpers');
+
+// Make business settings (from DB) + whatsapp helper available to every view rendered by this router.
+// Settings are read fresh from the in-memory cache on every request, so any change saved in
+// Admin -> Settings is reflected immediately across the whole public website.
+router.use((req, res, next) => {
+  res.locals.business = settingsService.getSettings();
+  res.locals.theme = config.theme;
+  res.locals.buildWhatsAppLink = buildWhatsAppLink;
+  res.locals.currentPath = req.path;
+  next();
+});
+
+// ---------- HOME ----------
+router.get('/', (req, res) => {
+  const settings = res.locals.business;
+  const featuredProducts = db
+    .prepare('SELECT * FROM products WHERE featured = 1 ORDER BY created_at DESC LIMIT 8')
+    .all();
+  const categories = db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
+
+  res.render('home', {
+    title: `${settings.name} | ${settings.tagline}`,
+    metaDescription: settings.metaDescription,
+    featuredProducts,
+    categories,
+  });
+});
+
+// ---------- PRODUCTS (catalogue with filter + search) ----------
+router.get('/products', (req, res) => {
+  const settings = res.locals.business;
+  const { category, q } = req.query;
+  const categories = db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
+
+  let sql = `
+    SELECT products.*, categories.name AS category_name, categories.slug AS category_slug
+    FROM products LEFT JOIN categories ON products.category_id = categories.id
+    WHERE 1 = 1
+  `;
+  const params = [];
+
+  if (category) {
+    sql += ' AND categories.slug = ?';
+    params.push(category);
+  }
+  if (q) {
+    sql += ' AND (products.name LIKE ? OR products.description LIKE ?)';
+    params.push(`%${q}%`, `%${q}%`);
+  }
+  sql += ' ORDER BY products.created_at DESC';
+
+  const products = db.prepare(sql).all(...params);
+
+  res.render('products', {
+    title: `Products | ${settings.name}`,
+    metaDescription: `Browse our full catalogue of hardware, electrical and electronic products at ${settings.name}.`,
+    products,
+    categories,
+    activeCategory: category || '',
+    searchTerm: q || '',
+  });
+});
+
+// ---------- PRODUCT DETAIL ----------
+router.get('/products/:slug', (req, res) => {
+  const settings = res.locals.business;
+  const product = db
+    .prepare(`
+      SELECT products.*, categories.name AS category_name, categories.slug AS category_slug
+      FROM products LEFT JOIN categories ON products.category_id = categories.id
+      WHERE products.slug = ?
+    `)
+    .get(req.params.slug);
+
+  if (!product) {
+    return res.status(404).render('404', { title: 'Product Not Found' });
+  }
+
+  const relatedProducts = db
+    .prepare(`
+      SELECT * FROM products
+      WHERE category_id = ? AND id != ?
+      ORDER BY RANDOM() LIMIT 4
+    `)
+    .all(product.category_id, product.id);
+
+  res.render('product-detail', {
+    title: `${product.name} | ${settings.name}`,
+    metaDescription: (product.description || '').slice(0, 155),
+    product,
+    relatedProducts,
+  });
+});
+
+// ---------- ABOUT ----------
+router.get('/about', (req, res) => {
+  const settings = res.locals.business;
+  res.render('about', {
+    title: `About Us | ${settings.name}`,
+    metaDescription: `Learn more about ${settings.name} - our products, values and commitment to customers.`,
+  });
+});
+
+// ---------- CONTACT ----------
+router.get('/contact', (req, res) => {
+  const settings = res.locals.business;
+  res.render('contact', {
+    title: `Contact Us | ${settings.name}`,
+    metaDescription: `Get in touch with ${settings.name}. Visit our store, call us or send an enquiry online.`,
+    submitted: req.query.submitted === '1',
+  });
+});
+
+// ---------- ENQUIRY SUBMISSION (used by contact form + product enquiry form) ----------
+router.post('/enquiry', (req, res) => {
+  const { customer_name, mobile, email, product_id, product_name, quantity, message, redirect_to } = req.body;
+
+  if (!customer_name || !mobile) {
+    return res.status(400).send('Name and mobile number are required.');
+  }
+
+  db.prepare(`
+    INSERT INTO enquiries (customer_name, mobile, email, product_id, product_name, quantity, message)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    customer_name,
+    mobile,
+    email || null,
+    product_id || null,
+    product_name || null,
+    quantity || null,
+    message || null
+  );
+
+  const backTo = redirect_to || '/contact';
+  const separator = backTo.includes('?') ? '&' : '?';
+  res.redirect(`${backTo}${separator}submitted=1`);
+});
+
+module.exports = router;

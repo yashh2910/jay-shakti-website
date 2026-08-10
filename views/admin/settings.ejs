@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+<%
+  // Parse business hours JSON safely for the form
+  let hoursData = {};
+  try { hoursData = JSON.parse(settings.business_hours || '{}'); } catch (e) { hoursData = {}; }
+  const days = [
+    ['monday', 'Monday'], ['tuesday', 'Tuesday'], ['wednesday', 'Wednesday'],
+    ['thursday', 'Thursday'], ['friday', 'Friday'], ['saturday', 'Saturday'], ['sunday', 'Sunday'],
+  ];
+%>
+<div class="admin-layout">
+  <%- include('../partials/admin-nav') %>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1>Settings</h1>
+      <a href="/" target="_blank" class="abtn abtn-outline">🌐 View Website</a>
+    </div>
+
+    <% if (success) { %>
+      <div class="admin-alert admin-alert-success">✅ Settings saved successfully. Changes are now live on your website.</div>
+    <% } %>
+    <% if (error) { %>
+      <div class="admin-alert admin-alert-error">⚠️ <%= error %></div>
+    <% } %>
+
+    <form action="/admin/settings" method="POST" enctype="multipart/form-data" id="settingsForm">
+      <div class="settings-layout">
+
+        <!-- TABS -->
+        <div class="settings-tabs" id="settingsTabs">
+          <button type="button" class="settings-tab-btn active" data-tab="general">🏢 General</button>
+          <button type="button" class="settings-tab-btn" data-tab="contact">📞 Contact</button>
+          <button type="button" class="settings-tab-btn" data-tab="address">📍 Address</button>
+          
+          <button type="button" class="settings-tab-btn" data-tab="social">🔗 Social Media</button>
+          <button type="button" class="settings-tab-btn" data-tab="whatsapp">💬 WhatsApp</button>
+          <button type="button" class="settings-tab-btn" data-tab="seo">🔍 SEO</button>
+          <button type="button" class="settings-tab-btn" data-tab="homepage">🖼️ Homepage &amp; Owner</button>
+          <button type="button" class="settings-tab-btn" data-tab="admin">🔐 Admin Account</button>
+        </div>
+
+        <!-- PANELS -->
+        <div>
+          <div class="admin-card">
+
+            <!-- GENERAL -->
+            <div class="settings-panel active" data-panel="general">
+              <h3>Business Information</h3>
+              <p class="panel-sub">This is how your business is introduced across the website.</p>
+
+              <div class="admin-form-row">
+                <div class="admin-form-group">
+                  <label for="business_name">Business / Company Name *</label>
+                  <input class="admin-form-control" type="text" id="business_name" name="business_name" required
+                    placeholder="e.g. Jay Shakti Hardware & Electronics" value="<%= settings.business_name || '' %>" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="short_name">Short Name <span style="font-weight:400;color:#7a877f;">(used in navbar/logo area)</span></label>
+                  <input class="admin-form-control" type="text" id="short_name" name="short_name"
+                    placeholder="e.g. Jay Shakti" value="<%= settings.short_name || '' %>" />
+                </div>
+              </div>
+
+              <div class="admin-form-group">
+                <label for="tagline">Tagline</label>
+                <input class="admin-form-control" type="text" id="tagline" name="tagline"
+                  placeholder="e.g. Your Trusted Partner for Hardware, Electrical & Electronic Needs" value="<%= settings.tagline || '' %>" />
+              </div>
+
+              <div class="admin-form-group">
+                <label for="description">Business Description</label>
+                <textarea class="admin-form-control" id="description" name="description" rows="4"
+                  placeholder="A short paragraph describing what your business offers"><%= settings.description || '' %></textarea>
+              </div>
+
+              <div class="settings-section-title">Logo</div>
+              <div class="admin-form-group">
+                <div class="image-upload-box">
+                  <img class="preview-thumb" src="<%= settings.logo || '/assets/logo/logo.jpeg' %>" alt="Current logo" />
+                  <div class="upload-fields">
+                    <input class="admin-form-control" type="file" name="logo_file" accept="image/*" style="margin-bottom:8px;" />
+                    <input class="admin-form-control" type="text" name="logo_url" placeholder="...or paste an image path e.g. /assets/logo/logo.jpeg" value="<%= settings.logo || '' %>" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-section-title">Favicon</div>
+              <div class="admin-form-group">
+                <div class="image-upload-box">
+                  <img class="preview-thumb" src="<%= settings.favicon || settings.logo || '/assets/logo/logo.jpeg' %>" alt="Current favicon" />
+                  <div class="upload-fields">
+                    <input class="admin-form-control" type="file" name="favicon_file" accept="image/*" style="margin-bottom:8px;" />
+                    <input class="admin-form-control" type="text" name="favicon_url" placeholder="...or paste an image path" value="<%= settings.favicon || '' %>" />
+                  </div>
+                </div>
+              </div>
+              <div class="settings-actions">
+              <button type="submit" class="abtn abtn-primary">💾 Save Settings</button>
+            </div>
+            </div>
+
+            <!-- CONTACT -->
+            <div class="settings-panel" data-panel="contact">
+              <h3>Contact Information</h3>
+              <p class="panel-sub">Shown in the header, footer, contact page and enquiry buttons across the site.</p>
+
+              <div class="admin-form-row">
+                <div class="admin-form-group">
+                  <label for="phone_primary">Primary Mobile Number</label>
+                  <input class="admin-form-control" type="text" id="phone_primary" name="phone_primary"
+                    placeholder="+91 XXXXX XXXXX" value="<%= settings.phone_primary || '' %>" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="phone_secondary">Secondary Mobile Number</label>
+                  <input class="admin-form-control" type="text" id="phone_secondary" name="phone_secondary"
+                    placeholder="+91 XXXXX XXXXX" value="<%= settings.phone_secondary || '' %>" />
+                </div>
+              </div>
+
+              <div class="admin-form-row">
+                <div class="admin-form-group">
+                  <label for="email">Email Address</label>
+                  <input class="admin-form-control" type="email" id="email" name="email"
+                    placeholder="info@yourbusiness.com" value="<%= settings.email || '' %>" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="email_alternate">Alternate Email Address</label>
+                  <input class="admin-form-control" type="email" id="email_alternate" name="email_alternate"
+                    placeholder="sales@yourbusiness.com" value="<%= settings.email_alternate || '' %>" />
+                </div>
+              </div>
+              <div class="settings-actions">
+              <button type="submit" class="abtn abtn-primary">💾 Save Settings</button>
+            </div>
+            </div>
+
+            <!-- ADDRESS -->
+            <div class="settings-panel" data-panel="address">
+              <h3>Business Address</h3>
+              <p class="panel-sub">Displayed on the homepage, contact page and footer.</p>
+
+              <div class="admin-form-group">
+                <label for="address">Full Address</label>
+                <textarea class="admin-form-control" id="address" name="address" rows="3"
+                  placeholder="Enter complete business address"><%= settings.address || '' %></textarea>
+              </div>
+
+              <div class="admin-form-row">
+                <div class="admin-form-group">
+                  <label for="area">Area / Locality</label>
+                  <input class="admin-form-control" type="text" id="area" name="area" value="<%= settings.area || '' %>" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="city">City</label>
+                  <input class="admin-form-control" type="text" id="city" name="city" value="<%= settings.city || '' %>" />
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-form-group">
+                  <label for="state">State</label>
+                  <input class="admin-form-control" type="text" id="state" name="state" value="<%= settings.state || '' %>" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="pincode">Pincode</label>
+                  <input class="admin-form-control" type="text" id="pincode" name="pincode" value="<%= settings.pincode || '' %>" />
+                </div>
+              </div>
+              <div class="admin-form-group">
+                <label for="country">Country</label>
+                <input class="admin-form-control" type="text" id="country" name="country" value="<%= settings.country || 'India' %>" />
+              </div>
+
+              <div class="settings-section-title">Google Map</div>
+              <div class="admin-form-group">
+                <label for="map_url">Google Maps URL <span style="font-weight:400;color:#7a877f;">(link to your location)</span></label>
+                <input class="admin-form-control" type="text" id="map_url" name="map_url" placeholder="Paste Google Maps URL" value="<%= settings.map_url || '' %>" />
+              </div>
+              <div class="admin-form-group">
+                <label for="map_embed_url">Google Maps Embed URL <span style="font-weight:400;color:#7a877f;">(for the map shown on the Contact page)</span></label>
+                <input class="admin-form-control" type="text" id="map_embed_url" name="map_embed_url" placeholder="Paste Google Maps embed URL" value="<%= settings.map_embed_url || '' %>" />
+              </div>
+              <div class="settings-actions">
+              <button type="submit" class="abtn abtn-primary">💾 Save Settings</button>
+            </div>
+            </div>
+
+            <!-- SOCIAL MEDIA -->
+            <div class="settings-panel" data-panel="social">
+              <h3>Social Media</h3>
+              <p class="panel-sub">Links used for the social icons across the website.</p>
+
+              <div class="admin-form-group">
+                <label for="facebook_url">Facebook URL</label>
+                <input class="admin-form-control" type="text" id="facebook_url" name="facebook_url" placeholder="https://facebook.com/yourpage" value="<%= settings.facebook_url || '' %>" />
+              </div>
+              <div class="admin-form-group">
+                <label for="instagram_url">Instagram URL</label>
+                <input class="admin-form-control" type="text" id="instagram_url" name="instagram_url" placeholder="https://instagram.com/yourpage" value="<%= settings.instagram_url || '' %>" />
+              </div>
+              <div class="admin-form-group">
+                <label for="youtube_url">YouTube URL</label>
+                <input class="admin-form-control" type="text" id="youtube_url" name="youtube_url" placeholder="https://youtube.com/@yourchannel" value="<%= settings.youtube_url || '' %>" />
+              </div>
+              <!-- <div class="admin-form-group">
+                <label for="linkedin_url">LinkedIn URL</label>
+                <input class="admin-form-control" type="text" id="linkedin_url" name="linkedin_url" placeholder="https://linkedin.com/company/yourbusiness" value="<%= settings.linkedin_url || '' %>" />
+              </div> -->
+              <div class="settings-actions">
+              <button type="submit" class="abtn abtn-primary">💾 Save Settings</button>
+            </div>
+            </div>
+
+            <!-- WHATSAPP -->
+            <div class="settings-panel" data-panel="whatsapp">
+              <h3>WhatsApp Settings</h3>
+              <p class="panel-sub">Controls every WhatsApp button on the website — floating button, product enquiry, contact page.</p>
+
+              <div class="admin-form-group">
+                <label for="whatsapp_number">WhatsApp Number <span style="font-weight:400;color:#7a877f;">(with country code, digits only)</span></label>
+                <input class="admin-form-control" type="text" id="whatsapp_number" name="whatsapp_number" placeholder="+91 XXXXX XXXXX" value="<%= settings.whatsapp_number || '' %>" />
+              </div>
+              <div class="admin-form-group">
+                <label for="whatsapp_message">Default WhatsApp Message</label>
+                <textarea class="admin-form-control" id="whatsapp_message" name="whatsapp_message" rows="3"
+                  placeholder="I would like to enquire about your products."><%= settings.whatsapp_message || '' %></textarea>
+              </div>
+              <div class="settings-actions">
+              <button type="submit" class="abtn abtn-primary">💾 Save Settings</button>
+            </div>
+            </div>
+
+            <!-- SEO / WEBSITE -->
+            <div class="settings-panel" data-panel="seo">
+              <h3>Website Settings</h3>
+              <p class="panel-sub">Used for search engines and the page title shown in the browser tab.</p>
+
+              <div class="admin-form-group">
+                <label for="website_title">Website Title</label>
+                <input class="admin-form-control" type="text" id="website_title" name="website_title" placeholder="Your Business Name" value="<%= settings.website_title || '' %>" />
+              </div>
+              <div class="admin-form-group">
+                <label for="meta_description">Meta Description</label>
+                <textarea class="admin-form-control" id="meta_description" name="meta_description" rows="3" placeholder="A short description shown in search engine results"><%= settings.meta_description || '' %></textarea>
+              </div>
+              <div class="admin-form-group">
+                <label for="footer_copyright">Footer Copyright Text <span style="font-weight:400;color:#7a877f;">(leave blank to use the default)</span></label>
+                <input class="admin-form-control" type="text" id="footer_copyright" name="footer_copyright" placeholder="e.g. © 2026 Your Business. All rights reserved." value="<%= settings.footer_copyright || '' %>" />
+              </div>
+            
+            <div class="settings-actions">
+              <button type="submit" class="abtn abtn-primary">💾 Save Settings</button>
+            </div>
+           
+        </div>
+        
+
+            <!-- HOMEPAGE SLIDESHOW & OWNER -->
+            <div class="settings-panel" data-panel="homepage">
+              <h3>🖼️ Homepage Slideshow</h3>
+              <p class="panel-sub">These images rotate automatically at the top of your homepage. Give each slide its own heading &amp; text and it will change along with the image.</p>
+
+              <% let heroSlidesRaw = []; try { heroSlidesRaw = JSON.parse(settings.hero_slides || '[]'); } catch (e) { heroSlidesRaw = []; } %>
+              <% let heroSlides = heroSlidesRaw.filter(Boolean).map(function (s) {
+                   return (typeof s === 'string') ? { image: s, title: '', subtitle: '' } : { image: s.image || '', title: s.title || '', subtitle: s.subtitle || '' };
+                 }); %>
+              <% if (heroSlides.length) { %>
+                <div class="settings-section-title">Current Slides</div>
+                <div class="hero-slides-manage-grid">
+                  <% heroSlides.forEach(function (slide, i) { %>
+                    <div class="hero-slide-manage-item">
+                      <img src="<%= slide.image %>" alt="Slide <%= i + 1 %>" />
+                      <input type="hidden" name="hero_slide_image" value="<%= slide.image %>" />
+                      <div class="hero-slide-manage-fields">
+                        <input class="admin-form-control" type="text" name="hero_slide_title" placeholder="Heading for this slide (optional)" value="<%= slide.title %>" />
+                        <input class="admin-form-control" type="text" name="hero_slide_subtitle" placeholder="Short text for this slide (optional)" value="<%= slide.subtitle %>" />
+                      </div>
+                      <label class="hero-slide-remove"><input type="checkbox" name="remove_hero_slide" value="<%= slide.image %>" /> Remove</label>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } else { %>
+                <p style="color:#7a877f;font-size:0.85rem;">No slideshow images yet — the homepage will show the default banner until you add some below.</p>
+              <% } %>
+
+              <div class="admin-form-group">
+                <label for="hero_slide_files">Add New Slide Images</label>
+                <input class="admin-form-control" type="file" id="hero_slide_files" name="hero_slide_files" accept="image/*" multiple />
+                <small style="color:#7a877f;">You can select multiple images at once (hold Ctrl/Cmd). New slides are added after the existing ones — save, then come back here to add a heading/text for each new slide.</small>
+              </div>
+
+              <div class="settings-section-title" style="margin-top:28px;">👤 Meet the Owner <span style="font-weight:400;color:#7a877f;">(shown on the Contact page)</span></div>
+              <div class="admin-form-group">
+                <div class="image-upload-box">
+                  <img class="preview-thumb" src="<%= settings.owner_photo || '/assets/logo/logo.jpeg' %>" alt="Owner photo" />
+                  <div class="upload-fields">
+                    <input class="admin-form-control" type="file" name="owner_photo_file" accept="image/*" />
+                  </div>
+                </div>
+              </div>
+              <div class="admin-form-group">
+                <label for="owner_intro">Owner Introduction</label>
+                <textarea class="admin-form-control" id="owner_intro" name="owner_intro" rows="5" placeholder="A short note introducing the owner — who they are, their experience, and their commitment to customers."><%= settings.owner_intro || '' %></textarea>
+              </div>
+
+              <div class="settings-actions">
+                <button type="submit" class="abtn abtn-primary">💾 Save Homepage &amp; Owner Info</button>
+              </div>
+            </div>
+
+        <!-- ADMIN ACCOUNT -->
+              <div class="settings-panel" data-panel="admin">
+                <h3>🔐 Admin Account</h3>
+                <p class="panel-sub">Change your admin login username and password. You must enter your <strong>current password</strong> below before any change here will be saved.</p>
+
+                <div class="admin-form-group">
+                  <label for="admin_username">New Username</label>
+                  <input
+                    class="admin-form-control"
+                    type="text"
+                    id="admin_username"
+                    name="admin_username"
+                    placeholder="Enter new username">
+                </div>
+
+                <div class="admin-form-group">
+                  <label for="current_password">Current Password *</label>
+                  <input
+                    class="admin-form-control"
+                    type="password"
+                    id="current_password"
+                    name="current_password"
+                    placeholder="Required to change username or password">
+                  <small style="color:#7a877f;">Required only if you're changing the username or password above/below.</small>
+                </div>
+
+                <div class="admin-form-group">
+                  <label for="new_password">New Password</label>
+                  <input
+                    class="admin-form-control"
+                    type="password"
+                    id="new_password"
+                    name="new_password"
+                    placeholder="New Password">
+                </div>
+
+                <div class="admin-form-group">
+                  <label for="confirm_password">Confirm Password</label>
+                  <input
+                    class="admin-form-control"
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    placeholder="Confirm New Password">
+                </div>
+                <div class="settings-actions">
+    <button type="submit" class="abtn abtn-primary">
+        💾 Update Admin Account
+    </button>
+</div>
+              </div>
+            </div>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script>
+  // Tab switching
+  const tabButtons = document.querySelectorAll('.settings-tab-btn');
+  const panels = document.querySelectorAll('.settings-panel');
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      tabButtons.forEach(function (b) { b.classList.remove('active'); });
+      panels.forEach(function (p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelector('.settings-panel[data-panel="' + btn.dataset.tab + '"]').classList.add('active');
+    });
+  });
+
+  // Live-preview logo/favicon when a new file is chosen
+  document.querySelectorAll('.image-upload-box input[type="file"]').forEach(function (input) {
+    input.addEventListener('change', function () {
+      if (input.files && input.files[0]) {
+        const img = input.closest('.image-upload-box').querySelector('.preview-thumb');
+        img.src = URL.createObjectURL(input.files[0]);
+      }
+    });
+  });
+   
+  // Dim time inputs when a day is marked closed
+  document.querySelectorAll('[data-closed-toggle]').forEach(function (checkbox) {
+    checkbox.addEventListener('change', function () {
+      checkbox.closest('.hours-row').classList.toggle('is-closed', checkbox.checked);
+    });
+  });
+ 
+</script>
+</body>
+</html>

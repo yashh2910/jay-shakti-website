@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-login-wrap">
+    <div class="admin-login-card">
+      <img src="<%= business.logo %>" alt="Logo" style="display:block; margin:0 auto 14px; width:64px; height:64px; border-radius:50%; object-fit:cover;" />
+      <h2>Admin Login</h2>
+      <p class="sub"><%= business.name %></p>
+      <% if (error) { %><div class="admin-error"><%= error %></div><% } %>
+      <form action="/admin/login" method="POST">
+        <div class="admin-form-group">
+          <label for="username">Username</label>
+          <input class="admin-form-control" type="text" id="username" name="username" required autofocus />
+        </div>
+        <div class="admin-form-group">
+          <label for="password">Password</label>
+          <input class="admin-form-control" type="password" id="password" name="password" required />
+        </div>
+        <button type="submit" class="abtn abtn-primary" style="width:100%; justify-content:center; padding:12px;">Log In</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

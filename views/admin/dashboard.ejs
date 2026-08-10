@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+  <%- include('../partials/admin-nav') %>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1>Welcome, <%= adminUsername %> 👋</h1>
+    </div>
+
+    <div class="stat-grid">
+      <div class="admin-card stat-card">
+        <div class="stat-num"><%= productCount %></div>
+        <div class="stat-label">Total Products</div>
+      </div>
+      <div class="admin-card stat-card">
+        <div class="stat-num"><%= categoryCount %></div>
+        <div class="stat-label">Categories</div>
+      </div>
+      <div class="admin-card stat-card">
+        <div class="stat-num"><%= enquiryCount %></div>
+        <div class="stat-label">Total Enquiries</div>
+      </div>
+      <div class="admin-card stat-card">
+        <div class="stat-num"><%= newEnquiryCount %></div>
+        <div class="stat-label">New Enquiries</div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h3>Recent Enquiries</h3>
+      <table class="admin-table">
+        <thead>
+          <tr><th>Name</th><th>Mobile</th><th>Product</th><th>Status</th><th>Date</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% recentEnquiries.forEach(function(e) { %>
+            <tr>
+              <td><%= e.customer_name %></td>
+              <td><%= e.mobile %></td>
+              <td><%= e.product_name || '-' %></td>
+              <td><span class="badge-status badge-<%= e.status.replace(' ','-') %>"><%= e.status %></span></td>
+              <td><%= new Date(e.created_at).toLocaleDateString() %></td>
+              <td><a href="/admin/enquiries/<%= e.id %>" class="abtn abtn-outline abtn-sm">View</a></td>
+            </tr>
+          <% }) %>
+          <% if (recentEnquiries.length === 0) { %>
+            <tr><td colspan="6" style="text-align:center; color:#7a877f;">No enquiries yet.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>
+<%= title ? title + " | " + business.websiteTitle : business.websiteTitle %>
+</title>
+<meta name="description" content="<%= typeof metaDescription !== 'undefined' && metaDescription ? metaDescription : (business.metaDescription || business.description) %>" />
+<meta name="robots" content="index, follow" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="<%= title %>" />
+<meta property="og:description" content="<%= typeof metaDescription !== 'undefined' && metaDescription ? metaDescription : (business.metaDescription || business.description) %>" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="<%= business.logo %>" />
+
+<link rel="icon" href="<%= business.favicon %>" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css" />
+
+<style>
+  :root {
+    --color-primary: <%= theme.primary %>;
+    --color-primary-dark: <%= theme.primaryDark %>;
+    --color-secondary: <%= theme.secondary %>;
+    --color-accent: <%= theme.accent %>;
+    --color-accent-dark: <%= theme.accentDark %>;
+    --color-dark: <%= theme.dark %>;
+    --color-light: <%= theme.light %>;
+    --font-display: 'Poppins', 'Inter', sans-serif;
+  }
+</style>

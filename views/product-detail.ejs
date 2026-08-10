@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+
+  <style>
+    .back-wrapper{
+      margin-bottom:20px;
+    }
+
+    .back-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 16px;
+      border:2px solid #0d6efd;
+      border-radius:8px;
+      color:#0d6efd;
+      text-decoration:none;
+      font-weight:600;
+      transition:.3s;
+    }
+
+    .back-btn:hover{
+      background:#0d6efd;
+      color:#fff;
+    }
+  </style>
+</head>
+
+<body>
+
+<%- include('partials/navbar') %>
+
+<section class="section">
+  <div class="container">
+
+    <div class="product-detail-grid">
+
+      <!-- LEFT IMAGE -->
+      <div class="fade-in-up">
+        <div class="pd-image">
+          <img src="<%= product.image %>" alt="<%= product.name %>">
+        </div>
+      </div>
+
+      <!-- RIGHT CONTENT -->
+      <div class="fade-in-up">
+
+        <!-- BACK BUTTON -->
+        <div class="back-wrapper">
+          <a href="javascript:history.back()" class="back-btn">
+            ← Back to Products
+          </a>
+        </div>
+
+        <span class="pd-category">
+          <%= product.category_name || 'General' %>
+        </span>
+
+        <h1 class="pd-title">
+          <%= product.name %>
+        </h1>
+
+        <span class="pd-availability">
+          ✔ <%= product.availability || 'In Stock' %>
+        </span>
+
+        <p class="pd-desc">
+          <%= product.description %>
+        </p>
+
+        <% if (product.specifications) { %>
+
+        <div class="pd-specs">
+          <h4>Specifications</h4>
+
+          <div class="pd-specs-list">
+            <% product.specifications.split('|').forEach(function(spec){ %>
+
+              <div>• <%= spec.trim() %></div>
+
+            <% }) %>
+          </div>
+
+        </div>
+
+        <% } %>
+
+        <form action="/enquiry" method="GET" onsubmit="return false;" class="qty-selector">
+
+          <label for="qty" style="font-weight:600;font-size:.9rem;">
+            Quantity:
+          </label>
+
+          <input
+            type="number"
+            id="qty"
+            min="1"
+            value="1"
+          >
+
+        </form>
+          
+        <div class="pd-actions">
+
+          <a href="#enquiry-form" class="btn btn-primary">
+            Send Enquiry
+          </a>
+        <a
+  id="pdWhatsappBtn"
+  href="<%= buildWhatsAppLink(business.whatsapp, {
+    productName: product.name,
+    quantity: '1',
+    defaultMessage: business.whatsappMessage
+  }) %>"
+  target="_blank"
+  rel="noopener"
+  class="btn btn-whatsapp"
+>
+  WhatsApp Enquiry
+</a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RELATED PRODUCTS -->
+
+    <% if (relatedProducts.length > 0) { %>
+
+    <div style="margin-top:60px;">
+
+      <h3 style="margin-bottom:8px;">
+        Related Products
+      </h3>
+
+      <div class="related-grid">
+
+        <% relatedProducts.forEach(function(rp){ %>
+
+        <div class="product-card fade-in-up">
+
+          <a href="/products/<%= rp.slug %>" class="thumb">
+            <img
+              src="<%= rp.image %>"
+              alt="<%= rp.name %>"
+              loading="lazy"
+            >
+          </a>
+
+          <div class="body">
+
+            <h3>
+              <a href="/products/<%= rp.slug %>">
+                <%= rp.name %>
+              </a>
+            </h3>
+
+            <div class="card-actions">
+              <a
+                href="/products/<%= rp.slug %>"
+                class="btn btn-outline-dark btn-sm"
+              >
+                View
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
+        <% }) %>
+
+      </div>
+
+    </div>
+
+    <% } %>
+
+    <!-- ENQUIRY FORM -->
+
+    <div
+      id="enquiry-form"
+      class="section-sm"
+      style="max-width:640px;margin:60px auto 0;"
+    >
+
+      <div class="section-heading">
+
+        <span class="eyebrow">
+          Product Enquiry
+        </span>
+
+        <h2>
+          Request Best Price
+        </h2>
+
+        <p>
+          Fill this form and we'll get back to you shortly with pricing and availability.
+        </p>
+
+      </div>
+
+      <div class="form-card fade-in-up">
+
+        <form action="/enquiry" method="POST">
+
+          <input
+            type="hidden"
+            name="product_id"
+            value="<%= product.id %>"
+          >
+
+          <input
+            type="hidden"
+            name="product_name"
+            value="<%= product.name %>"
+          >
+
+          <input
+            type="hidden"
+            name="redirect_to"
+            value="/products/<%= product.slug %>"
+          >
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="customer_name">
+                Full Name *
+              </label>
+
+              <input
+                class="form-control"
+                type="text"
+                id="customer_name"
+                name="customer_name"
+                required
+              >
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="mobile">
+                Mobile Number *
+              </label>
+
+              <input
+                class="form-control"
+                type="tel"
+                id="mobile"
+                name="mobile"
+                required
+              >
+
+            </div>
+
+          </div>
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="email">
+                Email
+              </label>
+
+              <input
+                class="form-control"
+                type="email"
+                id="email"
+                name="email"
+              >
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="quantity">
+                Quantity
+              </label>
+
+              <input
+                class="form-control"
+                type="text"
+                id="quantity"
+                name="quantity"
+                placeholder="e.g. 10 pcs"
+              >
+
+            </div>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="message">
+              Message
+            </label>
+
+            <textarea
+              class="form-control"
+              id="message"
+              name="message"
+              placeholder="Any additional details..."
+            ></textarea>
+
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+          >
+            Submit Enquiry
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+
+<script src="/js/main.js"></script>
+
+<script>
+
+const qtyInput = document.getElementById('qty');
+const waBtn = document.getElementById('pdWhatsappBtn');
+
+if (qtyInput && waBtn){
+
+  const baseHref = waBtn.getAttribute('href');
+
+  qtyInput.addEventListener('input',()=>{
+
+    const url = new URL(baseHref,window.location.origin);
+
+    const text = url.searchParams.get('text') || '';
+
+    const updated = text.replace(
+      /Quantity: \d*/,
+      'Quantity: ' + (qtyInput.value || '1')
+    );
+
+    url.searchParams.set('text',updated);
+
+    waBtn.href = url.toString();
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>

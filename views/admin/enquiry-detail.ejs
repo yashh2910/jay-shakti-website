@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+  <%- include('../partials/admin-nav') %>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1>Enquiry #<%= enquiry.id %></h1>
+      <a href="/admin/enquiries" class="abtn abtn-outline">&larr; Back to Enquiries</a>
+    </div>
+
+    <div class="admin-card" style="max-width:640px;">
+      <div class="detail-row"><div class="label">Customer Name</div><div><%= enquiry.customer_name %></div></div>
+      <div class="detail-row"><div class="label">Mobile</div><div><a href="tel:<%= enquiry.mobile %>"><%= enquiry.mobile %></a></div></div>
+      <div class="detail-row"><div class="label">Email</div><div><%= enquiry.email || '-' %></div></div>
+      <div class="detail-row"><div class="label">Product</div><div><%= enquiry.product_name || '-' %></div></div>
+      <div class="detail-row"><div class="label">Quantity</div><div><%= enquiry.quantity || '-' %></div></div>
+      <div class="detail-row"><div class="label">Message</div><div><%= enquiry.message || '-' %></div></div>
+      <div class="detail-row"><div class="label">Submitted On</div><div><%= new Date(enquiry.created_at).toLocaleString() %></div></div>
+      <div class="detail-row">
+        <div class="label">Current Status</div>
+        <div><span class="badge-status badge-<%= enquiry.status.replace(' ','-') %>"><%= enquiry.status %></span></div>
+      </div>
+
+      <hr style="margin:20px 0; border:none; border-top:1px solid #e3e8e5;" />
+
+      <form action="/admin/enquiries/<%= enquiry.id %>/status" method="POST" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+        <div class="admin-form-group" style="margin-bottom:0; flex:1; min-width:180px;">
+          <label for="status">Update Status</label>
+          <select class="admin-form-control" id="status" name="status">
+            <option <%= enquiry.status === 'New' ? 'selected' : '' %>>New</option>
+            <option <%= enquiry.status === 'Contacted' ? 'selected' : '' %>>Contacted</option>
+            <option <%= enquiry.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+            <option <%= enquiry.status === 'Completed' ? 'selected' : '' %>>Completed</option>
+          </select>
+        </div>
+        <button type="submit" class="abtn abtn-primary">Update</button>
+      </form>
+
+      <a href="https://wa.me/<%= enquiry.mobile.replace(/[^0-9]/g,'') %>" target="_blank" rel="noopener" class="abtn" style="background:#25D366; color:#fff; margin-top:16px;">💬 Message on WhatsApp</a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

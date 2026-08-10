@@ -1,0 +1,103 @@
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-col">
+      <a href="/" class="brand footer-brand">
+        <img src="<%= business.logo %>" alt="<%= business.name %> logo" class="brand-logo" />
+        <span class="brand-text">
+          <span class="brand-name"><%= business.shortName %></span>
+          <span class="brand-sub">Hardware &amp; Electronics</span>
+        </span>
+      </a>
+      <p class="footer-desc"><%= business.description %></p>
+      <% if (business.socials.facebook || business.socials.instagram || business.socials.youtube || business.socials.linkedin) { %>
+      <div class="footer-socials">
+        <% if (business.socials.facebook) { %>
+          <a href="<%= business.socials.facebook %>" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+          </a>
+        <% } %>
+        <% if (business.socials.instagram) { %>
+          <a href="<%= business.socials.instagram %>" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 2 .2 2.4.4.6.2 1 .5 1.5 1 .4.4.7.9 1 1.5.2.4.3 1.2.4 2.4.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 2-.4 2.4-.2.6-.5 1-1 1.5a4.2 4.2 0 0 1-1.5 1c-.4.2-1.2.3-2.4.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-2-.2-2.4-.4a4.2 4.2 0 0 1-1.5-1 4.2 4.2 0 0 1-1-1.5c-.2-.4-.3-1.2-.4-2.4C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-2 .4-2.4.2-.6.5-1 1-1.5.4-.4.9-.7 1.5-1 .4-.2 1.2-.3 2.4-.4C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.7.1-1 0-1.6.2-2 .3-.5.2-.8.4-1.2.8-.4.4-.6.7-.8 1.2-.1.4-.3 1-.3 2C3 9.5 3 9.9 3 13c0 3.1 0 3.5.1 4.7 0 1 .2 1.6.3 2 .2.5.4.8.8 1.2.4.4.7.6 1.2.8.4.1 1 .3 2 .3 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1 0 1.6-.2 2-.3.5-.2.8-.4 1.2-.8.4-.4.6-.7.8-1.2.1-.4.3-1 .3-2 .1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c0-1-.2-1.6-.3-2a3.2 3.2 0 0 0-.8-1.2 3.2 3.2 0 0 0-1.2-.8c-.4-.1-1-.3-2-.3-1.2-.1-1.6-.1-4.7-.1zm0 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 1.8a3.7 3.7 0 1 0 0 7.4 3.7 3.7 0 0 0 0-7.4zm5.7-2a1.3 1.3 0 1 1-2.6 0 1.3 1.3 0 0 1 2.6 0z"/></svg>
+          </a>
+        <% } %>
+        <% if (business.socials.youtube) { %>
+          <a href="<%= business.socials.youtube %>" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8zM9.6 15.5V8.5L15.8 12l-6.2 3.5z"/></svg>
+          </a>
+        <% } %>
+        <% if (business.socials.linkedin) { %>
+          <a href="<%= business.socials.linkedin %>" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24"><path d="M20.4 20.4h-3.5v-5.5c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.6H9.5V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.3-1.8 3.6 0 4.2 2.3 4.2 5.4v6.2zM5.3 7.4a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM7.1 20.4H3.6V9h3.5v11.4z"/></svg>
+          </a>
+        <% } %>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Categories</h4>
+      <ul class="footer-links">
+        <li><a href="/products?category=hardware-items">Hardware Items</a></li>
+        <li><a href="/products?category=electrical-items">Electrical Items</a></li>
+        <li><a href="/products?category=switches-sockets">Switches &amp; Sockets</a></li>
+        <li><a href="/products?category=led-lighting">LED &amp; Lighting</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contact Us</h4>
+      <ul class="footer-contact">
+        <li>📍 <%= business.address %><%= business.city ? ', ' + business.city : '' %><%= business.state ? ', ' + business.state : '' %><%= business.pincode ? ' - ' + business.pincode : '' %></li>
+        <% if (business.phone) { %><li>📞 <a href="tel:<%= business.phone.replace(/\s+/g,'') %>"><%= business.phone %></a></li><% } %>
+        <% if (business.phoneSecondary) { %><li>📞 <a href="tel:<%= business.phoneSecondary.replace(/\s+/g,'') %>"><%= business.phoneSecondary %></a></li><% } %>
+        <% if (business.whatsapp) { %>
+  <li>
+    💬
+    <a
+      href="<%= buildWhatsAppLink(business.whatsapp, {
+        defaultMessage: business.whatsappMessage
+      }) %>"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Chat WhatsApp
+    </a>
+  </li>
+<% } %>
+        <% if (business.email) { %><li>✉️ <a href="mailto:<%= business.email %>"><%= business.email %></a></li><% } %>
+        
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p><%= business.footerCopyright && business.footerCopyright.trim() ? business.footerCopyright : ('© ' + new Date().getFullYear() + ' ' + business.name + '. All rights reserved.') %></p>
+    </div>
+  </div>
+</footer>
+
+<% if (business.whatsapp) { %>
+<a
+  href="<%= buildWhatsAppLink(business.whatsapp, {
+    defaultMessage: business.whatsappMessage
+  }) %>"
+  class="whatsapp-float"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Chat with us on WhatsApp"
+>
+  <svg viewBox="0 0 32 32" width="30" height="30" fill="#fff"><path d="M16.02 3C9.4 3 4 8.4 4 15.02c0 2.4.66 4.63 1.8 6.55L4 29l7.63-1.75a11.9 11.9 0 0 0 4.39.84h.01c6.62 0 12.02-5.4 12.02-12.02C28.05 8.4 22.65 3 16.02 3zm0 21.8h-.01a9.86 9.86 0 0 1-5.03-1.38l-.36-.21-3.75.86.87-3.66-.24-.38a9.79 9.79 0 0 1-1.5-5.21c0-5.42 4.4-9.82 9.83-9.82 2.63 0 5.1 1.03 6.95 2.88a9.76 9.76 0 0 1 2.88 6.95c0 5.42-4.41 9.87-9.84 9.87zm5.4-7.38c-.29-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.29-.77.96-.94 1.16-.17.2-.35.22-.64.07-.29-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.29-.02-.45.13-.6.13-.13.29-.35.44-.52.15-.17.2-.29.29-.49.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.29-1.04 1.02-1.04 2.48s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.12-.26-.19-.55-.34z"/></svg>
+</a>
+<% } %>

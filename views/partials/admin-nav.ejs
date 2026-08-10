@@ -1,0 +1,22 @@
+<button type="button" id="adminSidebarToggle" class="admin-sidebar-toggle" aria-label="Open menu" aria-controls="adminSidebar" aria-expanded="false">☰</button>
+<div id="adminSidebarBackdrop" class="admin-sidebar-backdrop"></div>
+<aside class="admin-sidebar" id="adminSidebar">
+  <a href="/admin" class="brand" style="text-decoration: none;">
+    <img src="<%= business.logo %>" alt="Logo" />
+    <span><%= business.shortName %> Admin</span>
+  </a>
+  <nav>
+    <a href="/admin" class="admin-nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>">📊 Dashboard</a>
+    <a href="/admin/products" class="admin-nav-link <%= currentPage === 'products' ? 'active' : '' %>">📦 Products</a>
+    <a href="/admin/categories" class="admin-nav-link <%= currentPage === 'categories' ? 'active' : '' %>">🗂️ Categories</a>
+    <a href="/admin/enquiries" class="admin-nav-link <%= currentPage === 'enquiries' ? 'active' : '' %>">📩 Enquiries</a>
+    <a href="/admin/settings" class="admin-nav-link <%= currentPage === 'settings' ? 'active' : '' %>">⚙️ Settings</a>
+    <a href="/" target="_blank" class="admin-nav-link">🌐 View Website</a>
+  </nav>
+  <div class="admin-sidebar-footer">
+    <form action="/admin/logout" method="POST">
+      <button type="submit">Log Out</button>
+    </form>
+  </div>
+</aside>
+<script src="/js/admin.js"></script>

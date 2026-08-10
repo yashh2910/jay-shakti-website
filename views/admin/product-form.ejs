@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+  <%- include('../partials/admin-nav') %>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1><%= product ? 'Edit Product' : 'Add Product' %></h1>
+      <a href="/admin/products" class="abtn abtn-outline">&larr; Back to Products</a>
+    </div>
+
+    <div class="admin-card" style="max-width:720px;">
+      <form action="<%= product ? '/admin/products/' + product.id + '/edit' : '/admin/products/new' %>" method="POST" enctype="multipart/form-data">
+
+        <div class="admin-form-group">
+          <label for="name">Product Name *</label>
+          <input class="admin-form-control" type="text" id="name" name="name" required value="<%= product ? product.name : '' %>" />
+        </div>
+
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label for="category_id">Category</label>
+            <select class="admin-form-control" id="category_id" name="category_id">
+              <option value="">-- None --</option>
+              <% categories.forEach(function(cat) { %>
+                <option value="<%= cat.id %>" <%= product && product.category_id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label for="availability">Availability</label>
+            <select class="admin-form-control" id="availability" name="availability">
+              <option <%= product && product.availability === 'In Stock' ? 'selected' : '' %>>In Stock</option>
+              <option <%= product && product.availability === 'Limited Stock' ? 'selected' : '' %>>Limited Stock</option>
+              <option <%= product && product.availability === 'Out of Stock' ? 'selected' : '' %>>Out of Stock</option>
+              <option <%= product && product.availability === 'On Order' ? 'selected' : '' %>>On Order</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-form-group">
+          <label for="description">Description</label>
+          <textarea class="admin-form-control" id="description" name="description" rows="4"><%= product ? product.description : '' %></textarea>
+        </div>
+
+        <div class="admin-form-group">
+          <label for="specifications">Specifications <span style="font-weight:400; color:#7a877f;">(separate with | )</span></label>
+          <textarea class="admin-form-control" id="specifications" name="specifications" rows="3" placeholder="e.g. Material: Steel | Size: 4 inch | Pack: 6 pcs"><%= product ? product.specifications : '' %></textarea>
+        </div>
+
+        <div class="admin-form-group">
+          <label>Product Image</label>
+          <% if (product && product.image) { %>
+            <img src="<%= product.image %>" class="current-image-preview" alt="Current image" />
+          <% } %>
+          <input class="admin-form-control" type="file" name="image_file" accept="image/*" style="margin-bottom:10px;" />
+          <input class="admin-form-control" type="text" name="image_url" placeholder="...or paste an image path e.g. /assets/products/product-1.jpeg" value="<%= product ? product.image : '' %>" />
+        </div>
+
+        <div class="admin-form-group admin-checkbox">
+          <input type="checkbox" id="featured" name="featured" value="1" <%= product && product.featured ? 'checked' : '' %> />
+          <label for="featured" style="margin:0;">Show as Featured on Homepage</label>
+        </div>
+
+        <button type="submit" class="abtn abtn-primary" style="padding:12px 26px;"><%= product ? 'Save Changes' : 'Add Product' %></button>
+      </form>
+    </div>
+  </main>
+</div>
+</body>
+</html>
