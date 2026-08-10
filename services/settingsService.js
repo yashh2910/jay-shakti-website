@@ -12,8 +12,9 @@ const { formatBusinessHours, DAY_ORDER } = require('../utils/helpers');
 
 let cache = null;
 
-function getRawRow() {
-  let row = db.prepare('SELECT * FROM settings WHERE id = 1').get();
+async function getRawRow() {
+  let result = await db.execute('SELECT * FROM settings WHERE id = 1');
+  let row = result.rows[0];
   if (!row) {
     // Safety net: table exists but row missing (shouldn't normally happen
     // since db/database.js seeds it) — create sensible defaults on the fly.
@@ -27,11 +28,13 @@ function getRawRow() {
       saturday: { open: '09:30', close: '20:30', closed: false },
       sunday: { open: '10:00', close: '14:00', closed: false },
     });
-    db.prepare(`
-      INSERT OR IGNORE INTO settings (id, business_name, short_name, tagline, description, logo, favicon, phone_primary, whatsapp_number, email, address, business_hours, website_title, meta_description)
-      VALUES (1, ?, ?, ?, ?, '/assets/logo/logo.jpeg', '/assets/logo/logo.jpeg', ?, ?, ?, ?, ?, ?, ?)
-    `).run(b.name, b.shortName, b.tagline, b.description, b.phone, b.whatsapp, b.email, b.address, defaultHours, b.name, b.description);
-    row = db.prepare('SELECT * FROM settings WHERE id = 1').get();
+    await db.execute({
+      sql: `INSERT OR IGNORE INTO settings (id, business_name, short_name, tagline, description, logo, favicon, phone_primary, whatsapp_number, email, address, business_hours, website_title, meta_description)
+            VALUES (1, ?, ?, ?, ?, '/assets/logo/logo.jpeg', '/assets/logo/logo.jpeg', ?, ?, ?, ?, ?, ?, ?)`,
+      args: [b.name, b.shortName, b.tagline, b.description, b.phone, b.whatsapp, b.email, b.address, defaultHours, b.name, b.description],
+    });
+    result = await db.execute('SELECT * FROM settings WHERE id = 1');
+    row = result.rows[0];
   }
   return row;
 }
@@ -130,14 +133,25 @@ function mapRow(row) {
   };
 }
 
-function loadFromDb() {
-  cache = mapRow(getRawRow());
+async function loadFromDb() {
+  cache = mapRow(await getRawRow());
   return cache;
 }
 
+// Pre-load cache at startup (called from server.js after initDb).
+// After this, getSettings() can be called synchronously.
+async function preloadCache() {
+  await loadFromDb();
+}
+
 // Public: get the current settings (served from in-memory cache).
+// Synchronous — cache is guaranteed loaded after preloadCache().
 function getSettings() {
-  if (!cache) loadFromDb();
+  if (!cache) {
+    // Fallback: shouldn't happen if preloadCache was called at startup,
+    // but return sensible defaults just in case.
+    return mapRow({});
+  }
   return cache;
 }
 
@@ -145,13 +159,16 @@ function getSettings() {
 // snake_case DB column names (already validated/sanitized by the caller).
 // Refreshes the cache immediately so changes show up everywhere on the very
 // next request — no server restart required.
-function updateSettings(fields) {
+async function updateSettings(fields) {
   const columns = Object.keys(fields);
   if (columns.length === 0) return getSettings();
   const setClause = columns.map((c) => `${c} = ?`).join(', ');
   const values = columns.map((c) => fields[c]);
-  db.prepare(`UPDATE settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = 1`).run(...values);
+  await db.execute({
+    sql: `UPDATE settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = 1`,
+    args: values,
+  });
   return loadFromDb();
 }
 
-module.exports = { getSettings, getRawRow, updateSettings };
+module.exports = { getSettings, getRawRow, updateSettings, preloadCache };

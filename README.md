@@ -16,7 +16,7 @@ jay-shakti-website/
 ├── package.json
 │
 ├── db/
-│   ├── database.js           # SQLite connection + schema + default admin creation
+│   ├── database.js           # Turso/libsql connection + schema + default admin creation
 │   └── seed.js                # Seeds starter categories/products using your uploaded images
 │
 ├── routes/
@@ -61,10 +61,11 @@ editable there, no code changes required.
 
 - **Backend:** Node.js + Express
 - **Templating:** EJS (server-rendered, fast, SEO-friendly HTML)
-- **Database:** SQLite via `better-sqlite3` (file-based, zero setup, easy to back up)
+- **Database:** SQLite via `@libsql/client` — supports both [Turso](https://turso.tech) cloud (production) and local SQLite file (development)
 - **Auth:** `express-session` + `bcryptjs` for admin login
 - **File uploads:** `multer` for product/category images
 - **Frontend:** Hand-written responsive CSS (no framework bloat) + vanilla JS
+- **Containerised:** Dockerfile included for easy deployment
 - **No build step** — just `npm install` and run
 
 ---
@@ -98,6 +99,30 @@ editable there, no code changes required.
 
 ## 4. How to Run Locally
 
+### Option A — With Docker (recommended)
+
+**Requirements:** Docker Desktop.
+
+```bash
+# 1. Configure your business details
+cp .env.example .env
+# then edit .env: business name, address, phone, WHATSAPP_NUMBER, etc.
+
+# 2. Build the Docker image
+docker build -t jay-shakti-website .
+
+# 3. Run the container
+docker run -d --name jay-shakti -p 3000:3000 --env-file .env \
+  -v jay-shakti-data:/app/db \
+  -v jay-shakti-uploads:/app/public/uploads \
+  jay-shakti-website
+
+# 4. (Optional) Seed sample categories & products
+docker exec jay-shakti node db/seed.js
+```
+
+### Option B — Without Docker
+
 **Requirements:** Node.js 18+ and npm.
 
 ```bash
@@ -116,7 +141,10 @@ npm run seed
 npm start
 ```
 
-Then open:
+For development with auto-restart on file changes: `npm run dev`
+
+### Access the site
+
 - Website: **http://localhost:3000**
 - Admin panel: **http://localhost:3000/admin/login**
   - Default login → username: `admin`, password: `JayShakti@123`
@@ -125,7 +153,14 @@ Then open:
     the first time the database is created). If you already ran it once, delete
     `db/jayshakti.db*` and restart to regenerate with new credentials.
 
-For development with auto-restart on file changes: `npm run dev`
+### Useful Docker commands
+
+```bash
+docker logs jay-shakti          # View logs
+docker stop jay-shakti           # Stop the container
+docker start jay-shakti          # Restart the container
+docker rm -f jay-shakti          # Remove the container
+```
 
 ---
 
@@ -156,10 +191,12 @@ Categories can be managed the same way under **Categories**.
 ## 7. Required Environment Variables
 
 All are optional (sensible defaults exist) but you should set at least the
-business and WhatsApp details in `.env`:
+business, WhatsApp, and database details in `.env`:
 
 | Variable | Purpose |
 |---|---|
+| `TURSO_DATABASE_URL` | Turso cloud database URL (e.g. `libsql://your-db.turso.io`). Leave blank for local SQLite file |
+| `TURSO_AUTH_TOKEN` | Turso auth token. Leave blank for local development |
 | `PORT` | Port to run the server on (default 3000) |
 | `BUSINESS_NAME`, `BUSINESS_SHORT_NAME`, `BUSINESS_TAGLINE`, `BUSINESS_DESCRIPTION` | Shown across the site |
 | `BUSINESS_ADDRESS`, `BUSINESS_PHONE`, `BUSINESS_EMAIL`, `BUSINESS_HOURS` | Contact page & footer |
@@ -173,29 +210,59 @@ business and WhatsApp details in `.env`:
 
 ## 8. Deployment Instructions
 
-This is a standard Node.js app and can be deployed anywhere that runs Node:
+### Option A — Render + Turso (recommended, free tier)
 
-**Option A — VPS / your own server (Railway, Render, DigitalOcean, etc.)**
-1. Push the project to a Git repository
-2. On the host, set the environment variables from `.env.example` in the platform's dashboard
-3. Build/start command: `npm install && npm run seed && npm start`
-   (only run `npm run seed` on the very first deploy, or once you've added your own real
-   products from the admin panel you can skip it on future deploys)
-4. Make sure the `public/uploads` and `db/` folders are on **persistent storage** — some
-   platforms wipe the filesystem on redeploy, which would delete uploaded images and the
-   database. Use a persistent volume/disk if your host supports one (Railway volumes,
-   Render persistent disks, a VPS's normal disk, etc.)
-5. Point your domain to the host and enable HTTPS (most platforms do this automatically)
+This is the easiest way to deploy with persistent data at no cost.
 
-**Option B — Traditional shared hosting with Node support**
+**1. Set up Turso (cloud database)**
+1. Sign up at [turso.tech](https://turso.tech) (free tier: 9 GB storage)
+2. Install the CLI: `npm install -g turso`
+3. Create a database:
+   ```bash
+   turso db create jay-shakti
+   turso db show jay-shakti --url        # copy the URL
+   turso db tokens create jay-shakti     # copy the token
+   ```
+
+**2. Deploy on Render**
+1. Push the project to GitHub
+2. Go to [render.com](https://render.com) → **New+ → Web Service** → connect your repo
+3. Settings:
+   - **Runtime:** Docker
+   - **Instance Type:** Free
+4. Add environment variables:
+   - `TURSO_DATABASE_URL` — the URL from step 1
+   - `TURSO_AUTH_TOKEN` — the token from step 1
+   - `SESSION_SECRET` — a long random string
+   - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — your admin credentials
+   - All other business details from `.env.example`
+5. Click **Create Web Service** — your site will be live!
+
+> **Note:** File uploads (product images via multer) still use local disk and
+> will reset on Render's free tier. For persistent images, consider using
+> Cloudinary or AWS S3.
+
+### Option B — Docker on a VPS (DigitalOcean, AWS, etc.)
+
+```bash
+# Build and run with persistent volumes
+docker build -t jay-shakti-website .
+docker run -d --name jay-shakti -p 3000:3000 --env-file .env \
+  -v jay-shakti-data:/app/db \
+  -v jay-shakti-uploads:/app/public/uploads \
+  jay-shakti-website
+```
+
+### Option C — Traditional shared hosting with Node support
 1. Upload the project files (excluding `node_modules`)
 2. Run `npm install --production` on the server
 3. Use a process manager like `pm2` to keep it running: `pm2 start server.js --name jay-shakti`
 4. Configure your host's reverse proxy (e.g. Nginx) to forward your domain to the app's port
 
-**Before going live:**
+### Before going live
 - [ ] Set a strong, unique `SESSION_SECRET`
 - [ ] Change the default admin password
+- [ ] Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for cloud database
 - [ ] Fill in real business details and WhatsApp number in `.env`
 - [ ] Replace/verify all seeded product & category images from the Admin Panel
 - [ ] Add your real Google Maps embed URL

@@ -17,26 +17,26 @@ router.use((req, res, next) => {
 });
 
 // ---------- HOME ----------
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const settings = res.locals.business;
-  const featuredProducts = db
-    .prepare('SELECT * FROM products WHERE featured = 1 ORDER BY created_at DESC LIMIT 8')
-    .all();
-  const categories = db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
+  const featuredResult = await db.execute(
+    'SELECT * FROM products WHERE featured = 1 ORDER BY created_at DESC LIMIT 8'
+  );
+  const catResult = await db.execute('SELECT * FROM categories ORDER BY name ASC');
 
   res.render('home', {
     title: `${settings.name} | ${settings.tagline}`,
     metaDescription: settings.metaDescription,
-    featuredProducts,
-    categories,
+    featuredProducts: featuredResult.rows,
+    categories: catResult.rows,
   });
 });
 
 // ---------- PRODUCTS (catalogue with filter + search) ----------
-router.get('/products', (req, res) => {
+router.get('/products', async (req, res) => {
   const settings = res.locals.business;
   const { category, q } = req.query;
-  const categories = db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
+  const catResult = await db.execute('SELECT * FROM categories ORDER BY name ASC');
 
   let sql = `
     SELECT products.*, categories.name AS category_name, categories.slug AS category_slug
@@ -55,46 +55,45 @@ router.get('/products', (req, res) => {
   }
   sql += ' ORDER BY products.created_at DESC';
 
-  const products = db.prepare(sql).all(...params);
+  const prodResult = await db.execute({ sql, args: params });
 
   res.render('products', {
     title: `Products | ${settings.name}`,
     metaDescription: `Browse our full catalogue of hardware, electrical and electronic products at ${settings.name}.`,
-    products,
-    categories,
+    products: prodResult.rows,
+    categories: catResult.rows,
     activeCategory: category || '',
     searchTerm: q || '',
   });
 });
 
 // ---------- PRODUCT DETAIL ----------
-router.get('/products/:slug', (req, res) => {
+router.get('/products/:slug', async (req, res) => {
   const settings = res.locals.business;
-  const product = db
-    .prepare(`
-      SELECT products.*, categories.name AS category_name, categories.slug AS category_slug
-      FROM products LEFT JOIN categories ON products.category_id = categories.id
-      WHERE products.slug = ?
-    `)
-    .get(req.params.slug);
+  const result = await db.execute({
+    sql: `SELECT products.*, categories.name AS category_name, categories.slug AS category_slug
+          FROM products LEFT JOIN categories ON products.category_id = categories.id
+          WHERE products.slug = ?`,
+    args: [req.params.slug],
+  });
+  const product = result.rows[0];
 
   if (!product) {
     return res.status(404).render('404', { title: 'Product Not Found' });
   }
 
-  const relatedProducts = db
-    .prepare(`
-      SELECT * FROM products
-      WHERE category_id = ? AND id != ?
-      ORDER BY RANDOM() LIMIT 4
-    `)
-    .all(product.category_id, product.id);
+  const relatedResult = await db.execute({
+    sql: `SELECT * FROM products
+          WHERE category_id = ? AND id != ?
+          ORDER BY RANDOM() LIMIT 4`,
+    args: [product.category_id, product.id],
+  });
 
   res.render('product-detail', {
     title: `${product.name} | ${settings.name}`,
     metaDescription: (product.description || '').slice(0, 155),
     product,
-    relatedProducts,
+    relatedProducts: relatedResult.rows,
   });
 });
 
@@ -118,25 +117,26 @@ router.get('/contact', (req, res) => {
 });
 
 // ---------- ENQUIRY SUBMISSION (used by contact form + product enquiry form) ----------
-router.post('/enquiry', (req, res) => {
+router.post('/enquiry', async (req, res) => {
   const { customer_name, mobile, email, product_id, product_name, quantity, message, redirect_to } = req.body;
 
   if (!customer_name || !mobile) {
     return res.status(400).send('Name and mobile number are required.');
   }
 
-  db.prepare(`
-    INSERT INTO enquiries (customer_name, mobile, email, product_id, product_name, quantity, message)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    customer_name,
-    mobile,
-    email || null,
-    product_id || null,
-    product_name || null,
-    quantity || null,
-    message || null
-  );
+  await db.execute({
+    sql: `INSERT INTO enquiries (customer_name, mobile, email, product_id, product_name, quantity, message)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      customer_name,
+      mobile,
+      email || null,
+      product_id || null,
+      product_name || null,
+      quantity || null,
+      message || null,
+    ],
+  });
 
   const backTo = redirect_to || '/contact';
   const separator = backTo.includes('?') ? '&' : '?';

@@ -20,18 +20,6 @@ const categories = [
   { name: 'Other Products', image: '/assets/posters/poster-8.jpeg' },
 ];
 
-const insertCategory = db.prepare(
-  'INSERT OR IGNORE INTO categories (name, slug, image) VALUES (?, ?, ?)'
-);
-const getCategoryId = db.prepare('SELECT id FROM categories WHERE slug = ?');
-
-const catIds = {};
-for (const c of categories) {
-  const slug = slugify(c.name);
-  insertCategory.run(c.name, slug, c.image);
-  catIds[c.name] = getCategoryId.get(slug).id;
-}
-
 const sampleProducts = [
   {
     name: 'Premium Copper Wire (90m Coil)',
@@ -99,23 +87,49 @@ const sampleProducts = [
   },
 ];
 
-const insertProduct = db.prepare(`
-  INSERT OR IGNORE INTO products (name, slug, category_id, description, specifications, image, featured, availability)
-  VALUES (@name, @slug, @category_id, @description, @specifications, @image, @featured, @availability)
-`);
+async function seed() {
+  // Ensure tables exist
+  await db.initDb();
 
-for (const p of sampleProducts) {
-  insertProduct.run({
-    name: p.name,
-    slug: slugify(p.name),
-    category_id: catIds[p.category] || null,
-    description: p.description,
-    specifications: p.specifications,
-    image: p.image,
-    featured: p.featured,
-    availability: 'In Stock',
-  });
+  // Insert categories
+  const catIds = {};
+  for (const c of categories) {
+    const slug = slugify(c.name);
+    await db.execute({
+      sql: 'INSERT OR IGNORE INTO categories (name, slug, image) VALUES (?, ?, ?)',
+      args: [c.name, slug, c.image],
+    });
+    const result = await db.execute({
+      sql: 'SELECT id FROM categories WHERE slug = ?',
+      args: [slug],
+    });
+    catIds[c.name] = result.rows[0].id;
+  }
+
+  // Insert products
+  for (const p of sampleProducts) {
+    const slug = slugify(p.name);
+    await db.execute({
+      sql: `INSERT OR IGNORE INTO products (name, slug, category_id, description, specifications, image, featured, availability)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        p.name,
+        slug,
+        catIds[p.category] || null,
+        p.description,
+        p.specifications,
+        p.image,
+        p.featured,
+        'In Stock',
+      ],
+    });
+  }
+
+  console.log('Seed complete: categories and sample products added.');
+  console.log('Log in to /admin to edit, replace or add your real products and images.');
 }
 
-console.log('Seed complete: categories and sample products added.');
-console.log('Log in to /admin to edit, replace or add your real products and images.');
+seed().catch((err) => {
+  console.error('Seed failed:', err);
+  process.exit(1);
+});

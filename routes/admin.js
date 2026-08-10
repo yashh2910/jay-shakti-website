@@ -26,9 +26,13 @@ router.get('/login', (req, res) => {
   res.render('admin/login', { title: 'Admin Login', error: null });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const admin = db.prepare('SELECT * FROM admins WHERE username = ?').get(username);
+  const result = await db.execute({
+    sql: 'SELECT * FROM admins WHERE username = ?',
+    args: [username],
+  });
+  const admin = result.rows[0];
 
   if (!admin || !bcrypt.compareSync(password || '', admin.password_hash)) {
     return res.render('admin/login', { title: 'Admin Login', error: 'Invalid username or password.' });
@@ -47,12 +51,12 @@ router.post('/logout', (req, res) => {
 router.use(requireAdmin);
 
 // ---------- DASHBOARD ----------
-router.get('/', (req, res) => {
-  const productCount = db.prepare('SELECT COUNT(*) AS c FROM products').get().c;
-  const categoryCount = db.prepare('SELECT COUNT(*) AS c FROM categories').get().c;
-  const enquiryCount = db.prepare('SELECT COUNT(*) AS c FROM enquiries').get().c;
-  const newEnquiryCount = db.prepare(`SELECT COUNT(*) AS c FROM enquiries WHERE status = 'New'`).get().c;
-  const recentEnquiries = db.prepare('SELECT * FROM enquiries ORDER BY created_at DESC LIMIT 5').all();
+router.get('/', async (req, res) => {
+  const productCount = (await db.execute('SELECT COUNT(*) AS c FROM products')).rows[0].c;
+  const categoryCount = (await db.execute('SELECT COUNT(*) AS c FROM categories')).rows[0].c;
+  const enquiryCount = (await db.execute('SELECT COUNT(*) AS c FROM enquiries')).rows[0].c;
+  const newEnquiryCount = (await db.execute("SELECT COUNT(*) AS c FROM enquiries WHERE status = 'New'")).rows[0].c;
+  const recentEnquiries = (await db.execute('SELECT * FROM enquiries ORDER BY created_at DESC LIMIT 5')).rows;
 
   res.render('admin/dashboard', {
     title: 'Admin Dashboard',
@@ -66,86 +70,105 @@ router.get('/', (req, res) => {
 });
 
 // ---------- PRODUCTS ----------
-router.get('/products', (req, res) => {
-  const products = db.prepare(`
+router.get('/products', async (req, res) => {
+  const result = await db.execute(`
     SELECT products.*, categories.name AS category_name
     FROM products LEFT JOIN categories ON products.category_id = categories.id
     ORDER BY products.created_at DESC
-  `).all();
-  res.render('admin/products', { title: 'Manage Products', products });
+  `);
+  res.render('admin/products', { title: 'Manage Products', products: result.rows });
 });
 
-router.get('/products/new', (req, res) => {
-  const categories = db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
-  res.render('admin/product-form', { title: 'Add Product', product: null, categories });
+router.get('/products/new', async (req, res) => {
+  const result = await db.execute('SELECT * FROM categories ORDER BY name ASC');
+  res.render('admin/product-form', { title: 'Add Product', product: null, categories: result.rows });
 });
 
-router.post('/products/new', upload.single('image_file'), (req, res) => {
+router.post('/products/new', upload.single('image_file'), async (req, res) => {
   const { name, category_id, description, specifications, availability, featured, image_url } = req.body;
   const slug = slugify(name) + '-' + Date.now().toString().slice(-5);
   const image = req.file ? `/uploads/${req.file.filename}` : (image_url || '/assets/products/product-1.jpeg');
 
-  db.prepare(`
-    INSERT INTO products (name, slug, category_id, description, specifications, image, featured, availability)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(name, slug, category_id || null, description || '', specifications || '', image, featured ? 1 : 0, availability || 'In Stock');
+  await db.execute({
+    sql: `INSERT INTO products (name, slug, category_id, description, specifications, image, featured, availability)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [name, slug, category_id || null, description || '', specifications || '', image, featured ? 1 : 0, availability || 'In Stock'],
+  });
 
   res.redirect('/admin/products');
 });
 
-router.get('/products/:id/edit', (req, res) => {
-  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+router.get('/products/:id/edit', async (req, res) => {
+  const prodResult = await db.execute({
+    sql: 'SELECT * FROM products WHERE id = ?',
+    args: [req.params.id],
+  });
+  const product = prodResult.rows[0];
   if (!product) return res.redirect('/admin/products');
-  const categories = db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
-  res.render('admin/product-form', { title: 'Edit Product', product, categories });
+  const catResult = await db.execute('SELECT * FROM categories ORDER BY name ASC');
+  res.render('admin/product-form', { title: 'Edit Product', product, categories: catResult.rows });
 });
 
-router.post('/products/:id/edit', upload.single('image_file'), (req, res) => {
+router.post('/products/:id/edit', upload.single('image_file'), async (req, res) => {
   const { name, category_id, description, specifications, availability, featured, image_url } = req.body;
-  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  const existingResult = await db.execute({
+    sql: 'SELECT * FROM products WHERE id = ?',
+    args: [req.params.id],
+  });
+  const existing = existingResult.rows[0];
   if (!existing) return res.redirect('/admin/products');
 
   const image = req.file ? `/uploads/${req.file.filename}` : (image_url || existing.image);
 
-  db.prepare(`
-    UPDATE products SET name=?, category_id=?, description=?, specifications=?, image=?, featured=?, availability=?
-    WHERE id=?
-  `).run(name, category_id || null, description || '', specifications || '', image, featured ? 1 : 0, availability || 'In Stock', req.params.id);
+  await db.execute({
+    sql: `UPDATE products SET name=?, category_id=?, description=?, specifications=?, image=?, featured=?, availability=?
+          WHERE id=?`,
+    args: [name, category_id || null, description || '', specifications || '', image, featured ? 1 : 0, availability || 'In Stock', req.params.id],
+  });
 
   res.redirect('/admin/products');
 });
 
-router.post('/products/:id/delete', (req, res) => {
-  db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
+router.post('/products/:id/delete', async (req, res) => {
+  await db.execute({
+    sql: 'DELETE FROM products WHERE id = ?',
+    args: [req.params.id],
+  });
   res.redirect('/admin/products');
 });
 
 // ---------- CATEGORIES ----------
-router.get('/categories', (req, res) => {
-  const categories = db.prepare(`
+router.get('/categories', async (req, res) => {
+  const result = await db.execute(`
     SELECT categories.*, (SELECT COUNT(*) FROM products WHERE products.category_id = categories.id) AS product_count
     FROM categories ORDER BY name ASC
-  `).all();
-  res.render('admin/categories', { title: 'Manage Categories', categories });
+  `);
+  res.render('admin/categories', { title: 'Manage Categories', categories: result.rows });
 });
 
-router.post('/categories/new', upload.single('image_file'), (req, res) => {
+router.post('/categories/new', upload.single('image_file'), async (req, res) => {
   const { name, image_url } = req.body;
   const slug = slugify(name);
   const image = req.file ? `/uploads/${req.file.filename}` : (image_url || '/assets/posters/poster-1.jpeg');
   try {
-    db.prepare('INSERT INTO categories (name, slug, image) VALUES (?, ?, ?)').run(name, slug, image);
+    await db.execute({
+      sql: 'INSERT INTO categories (name, slug, image) VALUES (?, ?, ?)',
+      args: [name, slug, image],
+    });
   } catch (e) { /* ignore duplicate */ }
   res.redirect('/admin/categories');
 });
 
-router.post('/categories/:id/delete', (req, res) => {
-  db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
+router.post('/categories/:id/delete', async (req, res) => {
+  await db.execute({
+    sql: 'DELETE FROM categories WHERE id = ?',
+    args: [req.params.id],
+  });
   res.redirect('/admin/categories');
 });
 
 // ---------- ENQUIRIES ----------
-router.get('/enquiries', (req, res) => {
+router.get('/enquiries', async (req, res) => {
   const statusFilter = req.query.status || '';
   let sql = 'SELECT * FROM enquiries';
   const params = [];
@@ -154,32 +177,40 @@ router.get('/enquiries', (req, res) => {
     params.push(statusFilter);
   }
   sql += ' ORDER BY created_at DESC';
-  const enquiries = db.prepare(sql).all(...params);
-  res.render('admin/enquiries', { title: 'Enquiries', enquiries, statusFilter });
+  const result = await db.execute({ sql, args: params });
+  res.render('admin/enquiries', { title: 'Enquiries', enquiries: result.rows, statusFilter });
 });
 
-router.get('/enquiries/:id', (req, res) => {
-  const enquiry = db.prepare('SELECT * FROM enquiries WHERE id = ?').get(req.params.id);
+router.get('/enquiries/:id', async (req, res) => {
+  const result = await db.execute({
+    sql: 'SELECT * FROM enquiries WHERE id = ?',
+    args: [req.params.id],
+  });
+  const enquiry = result.rows[0];
   if (!enquiry) return res.redirect('/admin/enquiries');
   res.render('admin/enquiry-detail', { title: 'Enquiry Details', enquiry });
 });
 
-router.post('/enquiries/:id/status', (req, res) => {
+router.post('/enquiries/:id/status', async (req, res) => {
   const { status } = req.body;
-  db.prepare('UPDATE enquiries SET status = ? WHERE id = ?').run(status, req.params.id);
+  await db.execute({
+    sql: 'UPDATE enquiries SET status = ? WHERE id = ?',
+    args: [status, req.params.id],
+  });
   res.redirect(`/admin/enquiries/${req.params.id}`);
 });
 
-// 🗑️ Delete Enquiry Route (SQLite)
+// 🗑️ Delete Enquiry Route
 
-router.post('/enquiries/:id/delete', (req, res) => {
+router.post('/enquiries/:id/delete', async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // SQLite Delete Query
-    db.prepare('DELETE FROM enquiries WHERE id = ?').run(id);
 
-    
+    await db.execute({
+      sql: 'DELETE FROM enquiries WHERE id = ?',
+      args: [id],
+    });
+
     res.redirect('/admin/enquiries');
   } catch (err) {
     console.error("Delete Error:", err);
@@ -188,8 +219,8 @@ router.post('/enquiries/:id/delete', (req, res) => {
 });
 
 // ---------- SETTINGS ----------
-router.get('/settings', (req, res) => {
-  const row = settingsService.getRawRow();
+router.get('/settings', async (req, res) => {
+  const row = await settingsService.getRawRow();
   res.render('admin/settings', {
     title: 'Settings',
     settings: row,
@@ -206,10 +237,10 @@ router.post(
     { name: 'hero_slide_files', maxCount: 10 },
     { name: 'owner_photo_file', maxCount: 1 },
   ]),
-  (req, res) => {
+  async (req, res) => {
     const b = req.body;
     console.log("REQ BODY:", req.body);
-    const existing = settingsService.getRawRow();
+    const existing = await settingsService.getRawRow();
 
     try {
       // ---- Validation ----
@@ -236,9 +267,11 @@ router.post(
        // ---------- Update Admin Username & Password ----------
 if (b.admin_username || b.new_password) {
 
-    const admin = db.prepare(
-        "SELECT * FROM admins WHERE id = ?"
-    ).get(req.session.adminId);
+    const adminResult = await db.execute({
+        sql: "SELECT * FROM admins WHERE id = ?",
+        args: [req.session.adminId],
+    });
+    const admin = adminResult.rows[0];
 
     if (!admin) {
         throw new Error("Admin not found");
@@ -272,19 +305,15 @@ if (b.admin_username || b.new_password) {
         ? bcrypt.hashSync(b.new_password, 10)
         : admin.password_hash;
 
-    db.prepare(`
-        UPDATE admins
-        SET username = ?, password_hash = ?
-        WHERE id = ?
-    `).run(
-        username,
-        passwordHash,
-        admin.id
-    );
-    console.log(
-    db.prepare("SELECT * FROM admins WHERE id=?")
-      .get(req.session.adminId)
-);
+    await db.execute({
+        sql: `UPDATE admins SET username = ?, password_hash = ? WHERE id = ?`,
+        args: [username, passwordHash, admin.id],
+    });
+    const updatedAdmin = (await db.execute({
+        sql: "SELECT * FROM admins WHERE id=?",
+        args: [req.session.adminId],
+    })).rows[0];
+    console.log(updatedAdmin);
     req.session.adminUsername = username;
 }
       // ---- Business hours ----
@@ -327,7 +356,7 @@ if (b.admin_username || b.new_password) {
       const ownerPhotoFile = req.files && req.files.owner_photo_file && req.files.owner_photo_file[0];
       const ownerPhoto = ownerPhotoFile ? `/uploads/${ownerPhotoFile.filename}` : (existing.owner_photo || '');
      
-      settingsService.updateSettings({
+      await settingsService.updateSettings({
         
         business_name: sanitizeInput(b.business_name),
         short_name: sanitizeInput(b.short_name),
