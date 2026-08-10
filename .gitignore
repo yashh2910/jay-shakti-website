@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contains secrets)
+.env
+
+# SQLite database files
+db/*.db
+db/*.db-wal
+db/*.db-shm
+
+# Uploaded files (user-generated content)
+public/uploads/
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
+*.log
