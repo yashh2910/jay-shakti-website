@@ -349,8 +349,13 @@ ul { list-style: none; }
 
 .why-card:hover .why-icon{
     background:#0d6efd;
-    color:#fff;
     transform:translateY(-6px);
+}
+
+.why-card:hover .why-icon i,
+.why-card:hover .why-icon svg {
+    color:#fff;
+    fill:#fff;
 }
 
 .why-card{
