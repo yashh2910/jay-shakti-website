@@ -6,6 +6,7 @@ const config = require('../config');
 const settingsService = require('../services/settingsService');
 const { requireAdmin } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { uploadToCloudinary } = require('../services/cloudinaryStorage');
 const { slugify, isValidEmail, isValidPhone, isValidUrl, sanitizeInput, DAY_ORDER } = require('../utils/helpers');
 
 router.use((req, res, next) => {
@@ -87,7 +88,11 @@ router.get('/products/new', async (req, res) => {
 router.post('/products/new', upload.single('image_file'), async (req, res) => {
   const { name, category_id, description, specifications, availability, featured, image_url } = req.body;
   const slug = slugify(name) + '-' + Date.now().toString().slice(-5);
-  const image = req.file ? `/uploads/${req.file.filename}` : (image_url || '/assets/products/product-1.jpeg');
+
+  let image = image_url || '/assets/products/product-1.jpeg';
+  if (req.file) {
+    image = await uploadToCloudinary(req.file.buffer, 'jay-shakti/products');
+  }
 
   await db.execute({
     sql: `INSERT INTO products (name, slug, category_id, description, specifications, image, featured, availability)
@@ -118,7 +123,10 @@ router.post('/products/:id/edit', upload.single('image_file'), async (req, res) 
   const existing = existingResult.rows[0];
   if (!existing) return res.redirect('/admin/products');
 
-  const image = req.file ? `/uploads/${req.file.filename}` : (image_url || existing.image);
+  let image = image_url || existing.image;
+  if (req.file) {
+    image = await uploadToCloudinary(req.file.buffer, 'jay-shakti/products');
+  }
 
   await db.execute({
     sql: `UPDATE products SET name=?, category_id=?, description=?, specifications=?, image=?, featured=?, availability=?
@@ -149,7 +157,12 @@ router.get('/categories', async (req, res) => {
 router.post('/categories/new', upload.single('image_file'), async (req, res) => {
   const { name, image_url } = req.body;
   const slug = slugify(name);
-  const image = req.file ? `/uploads/${req.file.filename}` : (image_url || '/assets/posters/poster-1.jpeg');
+
+  let image = image_url || '/assets/posters/poster-1.jpeg';
+  if (req.file) {
+    image = await uploadToCloudinary(req.file.buffer, 'jay-shakti/categories');
+  }
+
   try {
     await db.execute({
       sql: 'INSERT INTO categories (name, slug, image) VALUES (?, ?, ?)',
@@ -329,8 +342,37 @@ if (b.admin_username || b.new_password) {
       // ---- Images (keep existing image if a new one wasn't uploaded / URL not given) ----
       const logoFile = req.files && req.files.logo_file && req.files.logo_file[0];
       const faviconFile = req.files && req.files.favicon_file && req.files.favicon_file[0];
-      const logo = logoFile ? `/uploads/${logoFile.filename}` : (sanitizeInput(b.logo_url) || existing.logo);
-      const favicon = faviconFile ? `/uploads/${faviconFile.filename}` : (sanitizeInput(b.favicon_url) || existing.favicon);
+
+      console.log('[SETTINGS] logo file received   :', logoFile ? `${logoFile.originalname} (${logoFile.size} bytes)` : 'none');
+      console.log('[SETTINGS] favicon file received :', faviconFile ? `${faviconFile.originalname} (${faviconFile.size} bytes)` : 'none');
+
+      let logo = sanitizeInput(b.logo_url) || existing.logo;
+      if (logoFile) {
+        console.log('[CLOUDINARY] Uploading logo...');
+        try {
+          logo = await uploadToCloudinary(logoFile.buffer, 'jay-shakti/settings/logo');
+          console.log('[CLOUDINARY] Logo uploaded OK :', logo);
+        } catch (cloudErr) {
+          console.error('[CLOUDINARY] Logo upload FAILED:', cloudErr.message);
+          console.error('[CLOUDINARY] Full error:', cloudErr);
+          throw cloudErr;
+        }
+      }
+
+      let favicon = sanitizeInput(b.favicon_url) || existing.favicon;
+      if (faviconFile) {
+        console.log('[CLOUDINARY] Uploading favicon...');
+        try {
+          favicon = await uploadToCloudinary(faviconFile.buffer, 'jay-shakti/settings/favicon', {
+            transformation: [{ width: 16, height: 16, crop: 'fill' }]
+          });
+          console.log('[CLOUDINARY] Favicon uploaded OK :', favicon);
+        } catch (cloudErr) {
+          console.error('[CLOUDINARY] Favicon upload FAILED:', cloudErr.message);
+          console.error('[CLOUDINARY] Full error:', cloudErr);
+          throw cloudErr;
+        }
+      }
 
       // ---- Homepage slideshow (keep existing slides not checked for removal, append new uploads) ----
       // Existing slides are posted back as parallel arrays (one entry per slide,
@@ -348,16 +390,37 @@ if (b.admin_username || b.new_password) {
         }))
         .filter((slide) => !removeSlides.includes(slide.image));
       const newSlideFiles = (req.files && req.files.hero_slide_files) || [];
-      const heroSlides = existingSlides.concat(
-        newSlideFiles.map((f) => ({ image: `/uploads/${f.filename}`, title: '', subtitle: '' }))
+      console.log('[SETTINGS] hero slide files received:', newSlideFiles.length);
+      const newSlideUrls = await Promise.all(
+        newSlideFiles.map(async (f, i) => {
+          console.log(`[CLOUDINARY] Uploading hero slide ${i + 1}: ${f.originalname}`);
+          try {
+            const url = await uploadToCloudinary(f.buffer, 'jay-shakti/settings/hero-slides');
+            console.log(`[CLOUDINARY] Hero slide ${i + 1} uploaded OK:`, url);
+            return { image: url, title: '', subtitle: '' };
+          } catch (cloudErr) {
+            console.error(`[CLOUDINARY] Hero slide ${i + 1} FAILED:`, cloudErr.message);
+            throw cloudErr;
+          }
+        })
       );
+      const heroSlides = existingSlides.concat(newSlideUrls);
 
       // ---- Owner photo (keep existing if no new file uploaded) ----
       const ownerPhotoFile = req.files && req.files.owner_photo_file && req.files.owner_photo_file[0];
-      const ownerPhoto = ownerPhotoFile ? `/uploads/${ownerPhotoFile.filename}` : (existing.owner_photo || '');
+      let ownerPhoto = existing.owner_photo || '';
+      if (ownerPhotoFile) {
+        console.log('[CLOUDINARY] Uploading owner photo:', ownerPhotoFile.originalname);
+        try {
+          ownerPhoto = await uploadToCloudinary(ownerPhotoFile.buffer, 'jay-shakti/settings/owner-photo');
+          console.log('[CLOUDINARY] Owner photo uploaded OK:', ownerPhoto);
+        } catch (cloudErr) {
+          console.error('[CLOUDINARY] Owner photo FAILED:', cloudErr.message);
+          throw cloudErr;
+        }
+      }
      
-      await settingsService.updateSettings({
-        
+      const updatePayload = {
         business_name: sanitizeInput(b.business_name),
         short_name: sanitizeInput(b.short_name),
         tagline: sanitizeInput(b.tagline),
@@ -396,16 +459,27 @@ if (b.admin_username || b.new_password) {
         hero_slides: JSON.stringify(heroSlides),
         owner_photo: ownerPhoto,
         owner_intro: sanitizeInput(b.owner_intro),
-      });
+      };
+
+      console.log('[TURSO] Saving settings to DB...');
+      console.log('[TURSO] logo value  :', updatePayload.logo);
+      console.log('[TURSO] favicon value:', updatePayload.favicon);
+      await settingsService.updateSettings(updatePayload);
+      console.log('[TURSO] Settings saved successfully.');
 
       res.redirect('/admin/settings?success=1');
     } catch (err) {
-      console.error('Failed to save settings:', err);
+      console.error('\n=== SETTINGS SAVE ERROR ===');
+      console.error('Message :', err.message || err);
+      console.error('HTTP code:', err.http_code || 'N/A');
+      console.error('Name    :', err.name || 'N/A');
+      console.error('Stack   :', err.stack || 'N/A');
+      console.error('===========================\n');
       res.render('admin/settings', {
         title: 'Settings',
         settings: { ...existing, ...b },
         success: false,
-        error: 'Something went wrong while saving settings. Please try again.',
+        error: `Something went wrong: ${err.message || 'Unknown error'}. Check server logs for details.`,
       });
     }
   }

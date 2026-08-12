@@ -8,12 +8,20 @@ const { buildWhatsAppLink } = require('../utils/helpers');
 // Make business settings (from DB) + whatsapp helper available to every view rendered by this router.
 // Settings are read fresh from the in-memory cache on every request, so any change saved in
 // Admin -> Settings is reflected immediately across the whole public website.
-router.use((req, res, next) => {
-  res.locals.business = settingsService.getSettings();
-  res.locals.theme = config.theme;
-  res.locals.buildWhatsAppLink = buildWhatsAppLink;
-  res.locals.currentPath = req.path;
-  next();
+router.use(async (req, res, next) => {
+  try {
+    res.locals.business = settingsService.getSettings();
+    res.locals.theme = config.theme;
+    res.locals.buildWhatsAppLink = buildWhatsAppLink;
+    res.locals.currentPath = req.path;
+    
+    const catResult = await db.execute('SELECT * FROM categories ORDER BY name ASC');
+    res.locals.globalCategories = catResult.rows;
+    
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ---------- HOME ----------

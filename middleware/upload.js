@@ -1,18 +1,12 @@
+/**
+ * upload.js — Multer middleware
+ * ------------------------------
+ * Uses memoryStorage so uploaded files are held in req.file.buffer (in RAM)
+ * and forwarded to Backblaze B2 by the route handler.
+ * No files are written to the local filesystem.
+ */
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const base = path.basename(file.originalname, ext).replace(/[^a-z0-9-_]/gi, '-');
-    cb(null, `${Date.now()}-${base}${ext}`);
-  },
-});
+const path   = require('path');
 
 function fileFilter(req, file, cb) {
   const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -22,9 +16,9 @@ function fileFilter(req, file, cb) {
 }
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(), // buffer in RAM; routes forward to B2
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
 });
 
 module.exports = upload;

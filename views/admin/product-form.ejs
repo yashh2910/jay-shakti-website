@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %></title>
   <link rel="stylesheet" href="/css/admin.css" />
+  <% if (locals.business && business.favicon) { %><link rel="icon" href="<%= business.favicon %>" /><% } %>
 </head>
 <body class="admin-body">
 <div class="admin-layout">
@@ -60,7 +61,6 @@
             <img src="<%= product.image %>" class="current-image-preview" alt="Current image" />
           <% } %>
           <input class="admin-form-control" type="file" name="image_file" accept="image/*" style="margin-bottom:10px;" />
-          <input class="admin-form-control" type="text" name="image_url" placeholder="...or paste an image path e.g. /assets/products/product-1.jpeg" value="<%= product ? product.image : '' %>" />
         </div>
 
         <div class="admin-form-group admin-checkbox">

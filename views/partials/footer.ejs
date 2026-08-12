@@ -48,10 +48,13 @@
     <div class="footer-col">
       <h4>Categories</h4>
       <ul class="footer-links">
-        <li><a href="/products?category=hardware-items">Hardware Items</a></li>
-        <li><a href="/products?category=electrical-items">Electrical Items</a></li>
-        <li><a href="/products?category=switches-sockets">Switches &amp; Sockets</a></li>
-        <li><a href="/products?category=led-lighting">LED &amp; Lighting</a></li>
+        <% if (globalCategories && globalCategories.length > 0) { %>
+          <% globalCategories.slice(0, 5).forEach(function(cat) { %>
+            <li><a href="/products?category=<%= cat.slug %>"><%= cat.name %></a></li>
+          <% }); %>
+        <% } else { %>
+          <li><a href="/products">All Products</a></li>
+        <% } %>
       </ul>
     </div>
 

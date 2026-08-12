@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %></title>
   <link rel="stylesheet" href="/css/admin.css" />
+  <% if (locals.business && business.favicon) { %><link rel="icon" href="<%= business.favicon %>" /><% } %>
 </head>
 <body class="admin-body">
 <div class="admin-layout">
@@ -24,7 +25,6 @@
         <div class="admin-form-group">
           <label>Category Image</label>
           <input class="admin-form-control" type="file" name="image_file" accept="image/*" style="margin-bottom:10px;" />
-          <input class="admin-form-control" type="text" name="image_url" placeholder="...or paste an image path e.g. /assets/posters/poster-1.jpeg" />
         </div>
         <button type="submit" class="abtn abtn-primary">Add Category</button>
       </form>
