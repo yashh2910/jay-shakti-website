@@ -6,6 +6,18 @@
   <title><%= title %></title>
   <link rel="stylesheet" href="/css/admin.css" />
   <% if (locals.business && business.favicon) { %><link rel="icon" href="<%= business.favicon %>" /><% } %>
+  <style>
+    .edit-form-row { display: none; background: #f8fafc; }
+    .edit-form-row.active { display: table-row; }
+    .edit-form-inline { display: flex; flex-direction: column; gap: 12px; padding: 12px 0; }
+    .edit-form-inline .admin-form-group { margin: 0; }
+    .edit-form-inline .edit-actions { display: flex; gap: 8px; align-items: center; }
+    .abtn-edit { background: #1E88E5; color: #fff; border: none; cursor: pointer; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; transition: background 0.2s; }
+    .abtn-edit:hover { background: #1565C0; }
+    .abtn-cancel { background: #94a3b8; color: #fff; border: none; cursor: pointer; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; transition: background 0.2s; }
+    .abtn-cancel:hover { background: #64748b; }
+    .thumb-sm-preview { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
+  </style>
 </head>
 <body class="admin-body">
 <div class="admin-layout">
@@ -36,13 +48,35 @@
         <thead><tr><th>Image</th><th>Name</th><th>Products</th><th></th></tr></thead>
         <tbody>
           <% categories.forEach(function(cat) { %>
-            <tr>
+            <tr id="cat-row-<%= cat.id %>">
               <td><img src="<%= cat.image %>" class="thumb-sm" alt="<%= cat.name %>" /></td>
               <td><%= cat.name %></td>
               <td><%= cat.product_count %></td>
-              <td>
+              <td style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                <button type="button" class="abtn abtn-edit" onclick="toggleEditRow(<%= cat.id %>)">Edit</button>
                 <form action="/admin/categories/<%= cat.id %>/delete" method="POST" onsubmit="return confirm('Delete this category? Products in it will become uncategorized.');">
                   <button type="submit" class="abtn abtn-danger abtn-sm">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr id="edit-row-<%= cat.id %>" class="edit-form-row">
+              <td colspan="4">
+                <form action="/admin/categories/<%= cat.id %>/edit" method="POST" enctype="multipart/form-data" class="edit-form-inline">
+                  <div class="admin-form-group">
+                    <label>Category Name *</label>
+                    <input class="admin-form-control" type="text" name="name" value="<%= cat.name %>" required />
+                  </div>
+                  <div class="admin-form-group">
+                    <label>Change Image (optional)</label>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <img src="<%= cat.image %>" class="thumb-sm-preview" alt="Current" />
+                      <input class="admin-form-control" type="file" name="image_file" accept="image/*" />
+                    </div>
+                  </div>
+                  <div class="edit-actions">
+                    <button type="submit" class="abtn abtn-primary">Save Changes</button>
+                    <button type="button" class="abtn-cancel" onclick="toggleEditRow(<%= cat.id %>)">Cancel</button>
+                  </div>
                 </form>
               </td>
             </tr>
@@ -55,5 +89,15 @@
     </div>
   </main>
 </div>
+
+<script>
+function toggleEditRow(id) {
+  const editRow = document.getElementById('edit-row-' + id);
+  if (editRow) {
+    editRow.classList.toggle('active');
+  }
+}
+</script>
+
 </body>
 </html>

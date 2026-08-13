@@ -172,6 +172,29 @@ router.post('/categories/new', upload.single('image_file'), async (req, res) => 
   res.redirect('/admin/categories');
 });
 
+router.post('/categories/:id/edit', upload.single('image_file'), async (req, res) => {
+  const { name } = req.body;
+  const slug = slugify(name);
+  const catId = req.params.id;
+
+  // Check if a new image was uploaded
+  if (req.file) {
+    const image = await uploadToCloudinary(req.file.buffer, 'jay-shakti/categories');
+    await db.execute({
+      sql: 'UPDATE categories SET name = ?, slug = ?, image = ? WHERE id = ?',
+      args: [name, slug, image, catId],
+    });
+  } else {
+    // Only update name and slug
+    await db.execute({
+      sql: 'UPDATE categories SET name = ?, slug = ? WHERE id = ?',
+      args: [name, slug, catId],
+    });
+  }
+
+  res.redirect('/admin/categories');
+});
+
 router.post('/categories/:id/delete', async (req, res) => {
   await db.execute({
     sql: 'DELETE FROM categories WHERE id = ?',
