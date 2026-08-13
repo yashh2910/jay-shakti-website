@@ -87,20 +87,21 @@
 
         <% } %>
 
-        <form action="/enquiry" method="GET" onsubmit="return false;" class="qty-selector">
-
+        <div class="qty-selector">
           <label for="qty" style="font-weight:600;font-size:.9rem;">
             Quantity:
           </label>
-
-          <input
-            type="number"
-            id="qty"
-            min="1"
-            value="1"
-          >
-
-        </form>
+          <div class="qty-input-group">
+            <button type="button" class="qty-btn" id="qtyMinusBtn" aria-label="Decrease quantity">&minus;</button>
+            <input
+              type="number"
+              id="qty"
+              min="1"
+              value="1"
+            >
+            <button type="button" class="qty-btn" id="qtyPlusBtn" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
           
         <div class="pd-actions">
 
@@ -333,33 +334,52 @@
 <script src="/js/main.js"></script>
 
 <script>
-
 const qtyInput = document.getElementById('qty');
+const qtyMinusBtn = document.getElementById('qtyMinusBtn');
+const qtyPlusBtn = document.getElementById('qtyPlusBtn');
 const waBtn = document.getElementById('pdWhatsappBtn');
 
-if (qtyInput && waBtn){
+function updateQuantity(newVal) {
+  const val = Math.max(1, parseInt(newVal, 10) || 1);
+  if (qtyInput) qtyInput.value = val;
 
-  const baseHref = waBtn.getAttribute('href');
-
-  qtyInput.addEventListener('input',()=>{
-
-    const url = new URL(baseHref,window.location.origin);
-
+  if (waBtn) {
+    const baseHref = waBtn.getAttribute('href');
+    const url = new URL(baseHref, window.location.origin);
     const text = url.searchParams.get('text') || '';
-
     const updated = text.replace(
       /Quantity: \d*/,
-      'Quantity: ' + (qtyInput.value || '1')
+      'Quantity: ' + val
     );
-
-    url.searchParams.set('text',updated);
-
+    url.searchParams.set('text', updated);
     waBtn.href = url.toString();
+  }
 
-  });
-
+  const formQtyInput = document.getElementById('quantity');
+  if (formQtyInput) {
+    formQtyInput.value = val;
+  }
 }
 
+if (qtyMinusBtn) {
+  qtyMinusBtn.addEventListener('click', () => {
+    const current = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
+    updateQuantity(current - 1);
+  });
+}
+
+if (qtyPlusBtn) {
+  qtyPlusBtn.addEventListener('click', () => {
+    const current = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
+    updateQuantity(current + 1);
+  });
+}
+
+if (qtyInput) {
+  qtyInput.addEventListener('input', () => {
+    updateQuantity(qtyInput.value);
+  });
+}
 </script>
 
 </body>

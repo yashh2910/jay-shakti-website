@@ -36,12 +36,9 @@
             <img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy" />
           </a>
           <div class="body">
-            <span class="cat-tag"><%= p.category_name || 'General' %></span>
             <h3><a href="/products/<%= p.slug %>"><%= p.name %></a></h3>
-            <p class="desc"><%= (p.description || '').slice(0, 80) %><%= (p.description||'').length > 80 ? '…' : '' %></p>
             <div class="card-actions">
               <a href="/products/<%= p.slug %>" class="btn btn-outline-dark btn-sm">View Details</a>
-              
             </div>
           </div>
         </div>

@@ -174,10 +174,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
           </a>
           <div class="body">
             <h3><a href="/products/<%= p.slug %>"><%= p.name %></a></h3>
-            <p class="desc"><%= (p.description || '').slice(0, 80) %><%= (p.description||'').length > 80 ? '…' : '' %></p>
             <div class="card-actions">
               <a href="/products/<%= p.slug %>" class="btn btn-outline-dark btn-sm">Get Best Price</a>
-              <!-- <a href="<%= buildWhatsAppLink(business.whatsapp, {productName: p.name, businessName: business.name, defaultMessage: business.whatsappMessage}) %>" target="_blank" rel="noopener" class="btn btn-whatsapp btn-sm">Enquiry</a> -->
             </div>
           </div>
         </div>
