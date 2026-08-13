@@ -16,25 +16,21 @@
    
 <% if (business.ownerPhoto || business.ownerIntro) { %>
 
-<div class="owner-intro-card fade-in-up" style="margin-bottom:36px;">
+<div class="owner-intro-section fade-in-up" style="margin-bottom:44px;">
 
-    <% if (business.ownerPhoto) { %>
-        <div class="owner-intro-photo">
-            <img src="<%= business.ownerPhoto %>" alt="Owner">
-        </div>
-    <% } %>
-
-    <div class="owner-intro-text">
-
-        <span class="eyebrow">About Me</span>
-
-        <h2><%= business.ownerName || "Vipulbhai G. Gabu" %></h2>
-
-        <% if (business.ownerIntro) { %>
-            <p><%= business.ownerIntro %></p>
-        <% } %>
-
+  <% if (business.ownerPhoto) { %>
+    <div class="owner-intro-img-wrap">
+      <img src="<%= business.ownerPhoto %>" alt="<%= business.ownerName || 'Owner' %>">
     </div>
+  <% } %>
+
+  <div class="owner-intro-body <%= business.ownerPhoto ? '' : 'owner-intro-body--full' %>">
+    <span class="eyebrow">About Me</span>
+    <h2><%= business.ownerName || "Vipulbhai G. Gabu" %></h2>
+    <% if (business.ownerIntro) { %>
+      <p class="owner-intro-desc"><%= business.ownerIntro %></p>
+    <% } %>
+  </div>
 
 </div>
 
