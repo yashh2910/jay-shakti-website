@@ -93,7 +93,10 @@
           <% if (business.hours) { %>
           <div class="contact-info-item">
             <div class="icon">🕒</div>
-            <div><h5>Business Hours</h5><p><%= business.hours %></p></div>
+            <div>
+              <h5>Business Hours</h5>
+              <p style="white-space: pre-line; line-height: 1.6;"><%= business.hours.split('  |  ').join('\n') %></p>
+            </div>
           </div>
           <% } %>
           <% if (business.socials.facebook || business.socials.instagram || business.socials.youtube || business.socials.linkedin) { %>

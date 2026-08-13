@@ -206,13 +206,13 @@
 
               <%
                 const hoursDays = [
-                  { key: 'mon', name: 'Monday' },
-                  { key: 'tue', name: 'Tuesday' },
-                  { key: 'wed', name: 'Wednesday' },
-                  { key: 'thu', name: 'Thursday' },
-                  { key: 'fri', name: 'Friday' },
-                  { key: 'sat', name: 'Saturday' },
-                  { key: 'sun', name: 'Sunday' }
+                  { key: 'monday', name: 'Monday' },
+                  { key: 'tuesday', name: 'Tuesday' },
+                  { key: 'wednesday', name: 'Wednesday' },
+                  { key: 'thursday', name: 'Thursday' },
+                  { key: 'friday', name: 'Friday' },
+                  { key: 'saturday', name: 'Saturday' },
+                  { key: 'sunday', name: 'Sunday' }
                 ];
               %>
 
@@ -232,10 +232,10 @@
                     <tr class="hours-row <%= d.closed ? 'is-closed' : '' %>">
                       <td class="hours-day-name"><%= day.name %></td>
                       <td>
-                        <input type="text" class="admin-form-control time-select" name="hours_<%= day.key %>_open" value="<%= d.open || '09:30 AM' %>" placeholder="e.g. 09:30 AM" />
+                        <input type="time" class="admin-form-control time-select" name="hours_<%= day.key %>_open" value="<%= d.open || '09:30' %>" />
                       </td>
                       <td>
-                        <input type="text" class="admin-form-control time-select" name="hours_<%= day.key %>_close" value="<%= d.close || '08:30 PM' %>" placeholder="e.g. 08:30 PM" />
+                        <input type="time" class="admin-form-control time-select" name="hours_<%= day.key %>_close" value="<%= d.close || '20:30' %>" />
                       </td>
                       <td>
                         <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
